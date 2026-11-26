@@ -134,6 +134,7 @@ input,select{-webkit-user-select:text;user-select:text}
     <button id="acct" class="acct" title="Account e salvataggio">📱 Su questo dispositivo</button>
   </header>
   <main id="list" class="list"></main>
+  <div id="verTag" style="position:fixed;bottom:calc(6px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);font-size:11px;color:var(--mut);pointer-events:none"></div>
   <div class="home-actions"><button id="btnNewFolder" class="btn shadow">📁 Nuova cartella</button></div>
   <button id="fab" class="fab" aria-label="Nuovo disegno" title="Nuovo disegno">+</button>
 </div>
@@ -200,7 +201,7 @@ input,select{-webkit-user-select:text;user-select:text}
 <script>
 'use strict';
 /* =================== DATI =================== */
-const APP_VERSION = '4';   // si vede toccando il pulsante dell'account: serve a capire se il telefono ha l'ultima versione
+const APP_VERSION = '5';   // si vede toccando il pulsante dell'account: serve a capire se il telefono ha l'ultima versione
 const LS_KEY = 'misure_forme_v1';
 const OPT_KEY = 'misure_forme_opts';
 const OWNER_KEY = 'misure_forme_owner';
@@ -772,7 +773,7 @@ function mergeShapes(a, b){
   const ia = D.shapes.indexOf(a);
   D.shapes = D.shapes.filter(x => x !== b); D.shapes.splice(D.shapes.indexOf(a), 1, s);
   if(ia < 0) D.shapes.push(s);
-  selShape = s.id; save(); refresh();
+  selShape = s.id; selSide = null; save(); refresh();
   toast('Forme unite in una sola ✓' + (D.scale ? ' Area: ' + fmtArea(shapeAreaCm2(s)) : ''));
   return null;
 }
@@ -813,6 +814,7 @@ let tool = 'line';
 let draft = [], rubber = null;   // forma in costruzione (strumento Linee)
 let draftFrom = null, draftMeasures = {};   // linea aperta che si sta continuando
 let selShape = null, selSolid = null;
+let selSide = null;              // lato selezionato da solo: {id della forma, i = numero del lato}
 let history = [];
 let act = null;                  // azione del puntatore in corso
 let resultKind = null;           // 'area' | 'perim' | 'vol' | null
@@ -823,7 +825,7 @@ function openEditor(id){
   D = db.drawings.find(d => d.id === id);
   if(!D.solids) D.solids = [];
   D.shapes.forEach(s => { if(!s.measures) s.measures = {}; if(s.geo) regen(s); });
-  history = []; draft = []; rubber = null; draftFrom = null; draftMeasures = {}; mergePick = null; mergePick3 = null; selShape = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
+  history = []; draft = []; rubber = null; draftFrom = null; draftMeasures = {}; mergePick = null; mergePick3 = null; selShape = null; selSide = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
   cam = {yaw:-0.38, pitch:0.5, k:1, px:0, py:0}; viewIdx = 0;
   $('#home').classList.add('hidden'); $('#editor').classList.remove('hidden');
   $('#unitSel').value = D.unit;
@@ -905,11 +907,41 @@ $('#dCancel').onclick = () => cancelDraft();
 async function deleteSelected(){
   if(mode === '3d') return deleteSolid();
   if(draft.length) return cancelDraft();
-  if(!selShape) return toast('Seleziona prima una forma (strumento Seleziona)');
+  if(!selShape && selSide) return deleteSide();
+  if(!selShape) return toast('Tocca dentro una forma per selezionarla tutta, oppure tocca un lato');
   pushHistory();
-  D.shapes = D.shapes.filter(s => s.id !== selShape); selShape = null;
+  D.shapes = D.shapes.filter(s => s.id !== selShape); selShape = null; selSide = null;
   if(!hasMeasures()) D.scale = null;
   save(); refresh(); toast('Forma eliminata · premi Annulla per recuperarla');
+}
+/* elimina solo il lato selezionato: se è in comune con un'altra forma le unisce,
+   se la forma era chiusa diventa una linea aperta, se era una linea si divide in due */
+function deleteSide(){
+  const s = D.shapes.find(x => x.id === selSide.id), i = selSide.i;
+  if(!s){ selSide = null; return refresh(); }
+  const nb = sharedNeighbor(s, i);
+  if(nb){ selSide = null; return tryMerge(s, nb); }
+  if((s.holes || []).length) return toast('Questa forma ha un buco: non si può aprire togliendo un lato');
+  pushHistory();
+  if(s.geo) toPlain(s);
+  const n = s.pts.length, old = s.measures || {};
+  if(s.closed){
+    s.pts = s.pts.slice(i+1).concat(s.pts.slice(0, i+1));
+    const m = {}; for(const k in old){ const j = +k; if(j !== i) m[(j - (i+1) + n) % n] = old[k]; }
+    s.measures = m; s.closed = false;
+    toast('Lato eliminato: ora è una linea aperta · premi Annulla per recuperarlo');
+  } else {
+    const a = s.pts.slice(0, i+1), b = s.pts.slice(i+1), ma = {}, mb = {};
+    for(const k in old){ const j = +k; if(j < i) ma[j] = old[k]; else if(j > i) mb[j - i - 1] = old[k]; }
+    const idx = D.shapes.indexOf(s), parts = [];
+    if(a.length >= 2) parts.push({...s, pts:a, measures:ma});
+    if(b.length >= 2) parts.push({...s, id:uid(), pts:b, measures:mb});
+    D.shapes.splice(idx, 1, ...parts);
+    toast('Lato eliminato · premi Annulla per recuperarlo');
+  }
+  selSide = null;
+  if(!hasMeasures()) D.scale = null;
+  save(); refresh();
 }
 
 const samePt = (a, b) => dist(a, b) <= tolPx()/view.z*0.5;
@@ -940,14 +972,14 @@ function finishDraft(close){
   const old = draftFrom && draftFrom.shape;
   const s = {id: old ? old.id : uid(), pts, closed:close, measures:meas, name: old ? old.name || '' : ''};
   if(old) D.shapes.splice(Math.min(draftFrom.idx, D.shapes.length), 0, s); else D.shapes.push(s);
-  selShape = s.id; save();
+  selShape = s.id; selSide = null; save();
   toast(close ? 'Forma chiusa ✓ Tocca un lato per inserire la misura' : joined || old ? 'Linea collegata ✓ È un’unica linea' : 'Linea creata ✓ Tocca un lato per la misura');
   draft = []; rubber = null; draftFrom = null; draftMeasures = {}; refresh();
 }
 function commitShape(pts, closed){
   pushHistory();
   const s = {id:uid(), pts, closed, measures:{}};
-  D.shapes.push(s); selShape = s.id; save();
+  D.shapes.push(s); selShape = s.id; selSide = null; save();
   toast('Forma creata ✓ Tocca un lato per inserire la misura');
 }
 /* forma dallo strumento Forme: riquadro da A a B (coordinate mondo) */
@@ -963,7 +995,7 @@ function buildFromBox(A, B){
   regen(s); return s;
 }
 function addShape(s){
-  pushHistory(); D.shapes.push(s); selShape = s.id; save();
+  pushHistory(); D.shapes.push(s); selShape = s.id; selSide = null; save();
   toast(s.geo ? 'Forma creata ✓ Toccala per scrivere le misure' : 'Forma creata ✓ Tocca un lato per inserire la misura');
 }
 
@@ -1097,21 +1129,56 @@ function hitShape(sp){
    altrimenti si apre la misura */
 function openShapeOrSide(shape, i){
   const nb = sharedNeighbor(shape, i);
-  const measure = () => shape.geo ? openShapeDims(shape) : openMeasure(shape, i);
+  // un lato si misura da solo; solo le forme con lati curvi usano il modulo con diametro, raggio...
+  const measure = () => isCurved(shape) ? openShapeDims(shape) : openMeasure(shape, i);
+  selSide = {id:shape.id, i}; selShape = null; draw();
   if(!nb) return measure();
-  selShape = shape.id; draw();
   actionSheet('Linea in comune tra due forme', [
     {label:'✂️ Elimina questa linea (unisci in una forma sola)', fn: () => tryMerge(shape, nb)},
     {label:'📏 Scrivi la misura di questo lato', fn: measure},
   ], 'Eliminando la linea le due forme diventano un’unica forma, con un’unica area.');
+}
+/* ---- il disegno resta della stessa grandezza sullo schermo qualunque misura si scriva ----
+   Le misure vere sono quelle scritte; il disegno viene solo ingrandito/rimpicciolito tutto insieme
+   (cambia la scala, non le misure), così non esce mai dallo schermo, anche con 25 km. */
+function drawBox(){
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  D.shapes.forEach(s => s.pts.forEach(q => { x0=Math.min(x0,q.x); y0=Math.min(y0,q.y); x1=Math.max(x1,q.x); y1=Math.max(y1,q.y); }));
+  return x0 === Infinity ? null : {x0, y0, x1, y1, cx:(x0+x1)/2, cy:(y0+y1)/2, s:Math.max(x1-x0, y1-y0)};
+}
+function transformDrawing(f, from, to){
+  const tq = q => { q.x = to.cx + (q.x - from.cx)*f; q.y = to.cy + (q.y - from.cy)*f; };
+  D.shapes.forEach(s => {
+    if(s.geo){
+      const c = {x:s.geo.cx, y:s.geo.cy}; tq(c); s.geo.cx = c.x; s.geo.cy = c.y;
+      SH[s.geo.t].ps.forEach(q => { if(q.t === 'len') s.geo.p[q.k] *= f; });
+      regen(s);
+    } else [s.pts, ...(s.holes||[])].forEach(r => r.forEach(tq));
+  });
+  if(D.scale) D.scale /= f;
+}
+function keepSize(before){
+  const after = drawBox();
+  if(before && after && before.s > 0 && after.s > 0){
+    const f = before.s / after.s;
+    if(Math.abs(f - 1) > 1e-12 || Math.abs(after.cx - before.cx) + Math.abs(after.cy - before.cy) > 0) transformDrawing(f, after, before);
+  }
+  keepInView();
+}
+/* una forma del menu Forme diventa un poligono normale, per poter misurare lato per lato */
+function toPlain(s){
+  if(!s.geo) return;
+  const all = D.scale && geoAllMeasured(s), m = {};
+  if(all) for(let i=0;i<segCount(s);i++) m[i] = segLenCm(s, i);
+  s.kind = s.geo.t; delete s.geo; s.measures = m;
 }
 /* cursore alla fine del numero, senza selezionarlo tutto */
 function focusEnd(el){ if(!el) return; el.focus(); try{ const n = el.value.length; el.setSelectionRange(n, n); }catch(e){} }
 
 /* ---- MISURA di un lato ---- */
 function openMeasure(shape, i){
-  selShape = shape.id; draw();
-  const m = shape.measures[i];
+  selSide = {id:shape.id, i}; selShape = null; draw();
+  const m = shape.geo ? null : shape.measures[i];
   let u = D.unit;
   const valStr = m != null ? numStr(fromCm(m, u)) : '';
   const desc = D.scale
@@ -1131,7 +1198,10 @@ function openMeasure(shape, i){
     if(!(v > 0)){ inp.style.borderColor = 'var(--danger)'; inp.focus(); return; }
     const unit = $('#mUnit').value;
     if(unit !== D.unit) setUnit(unit);
-    closeModal(); pushHistory(); applyMeasure(shape, i, toCm(v, unit)); save(); refresh(); keepInView();
+    closeModal(); pushHistory();
+    const before = drawBox();
+    if(shape.geo) toPlain(shape);
+    applyMeasure(shape, i, toCm(v, unit)); keepSize(before); save(); refresh();
   };
   inp.onkeydown = e => { if(e.key === 'Enter') $('#mOk').click(); if(e.key === 'Escape') closeModal(); };
   if(m != null) $('#mDel').onclick = () => {
@@ -1160,7 +1230,7 @@ function applyMeasure(shape, i, cm){
 function geoMeasured(s, k){ return !!(s.geo.measured && (s.geo.mk ? s.geo.mk[k] : true)); }
 function geoAllMeasured(s){ return SH[s.geo.t].ps.every(q => q.t !== 'len' || geoMeasured(s, q.k)); }
 function openShapeDims(s){
-  selShape = s.id; draw();
+  selShape = s.id; selSide = null; draw();
   const T = SH[s.geo.t], p = s.geo.p;
   paramForm({
     title: 'Misure: ' + T.nm,
@@ -1168,9 +1238,9 @@ function openShapeDims(s){
     fields: T.ps.map(q => ({k:q.k, n:q.n, t:q.t, v: q.t === 'len' ? (D.scale && geoMeasured(s, q.k) ? p[q.k]*D.scale : null) : p[q.k]})),
     rot: s.geo.rot || 0,
     name: {v:s.name, ph:T.nm},
-    delLabel: 'Elimina forma', onDel: () => { selShape = s.id; deleteSelected(); },
+    delLabel: 'Elimina forma', onDel: () => { selShape = s.id; selSide = null; deleteSelected(); },
     onSave: (vals, ex) => {
-      const np = {...p}; let sc = D.scale;
+      const np = {...p}; let sc = D.scale; const before = drawBox();
       const lens = T.ps.filter(q => q.t === 'len');
       if(!sc){ const first = lens.find(q => vals[q.k] != null); if(first) sc = vals[first.k] / p[first.k]; }
       let anyLen = false; const mk = {...(s.geo.mk || (s.geo.measured ? Object.fromEntries(lens.map(q => [q.k, true])) : {}))};
@@ -1184,7 +1254,7 @@ function openShapeDims(s){
       D.scale = sc; s.geo.p = np; s.geo.rot = ex.rot || 0; s.name = ex.name || '';
       s.geo.mk = mk; s.geo.measured = anyLen || Object.keys(mk).length > 0;
       if(ex.unit !== D.unit) setUnit(ex.unit);
-      regen(s); save(); refresh(); keepInView();
+      regen(s); keepSize(before); save(); refresh();
       return null;
     }
   });
@@ -1243,7 +1313,7 @@ function updateHint(){
                                         : 'Tocca per mettere i punti o trascina per tracciare una linea · tocca un lato per la misura';
     else if(tool === 'shape') h = SH[opts.shape].nm + ': trascina per disegnarla · tocca “Forme” per cambiarla';
     else if(tool === 'free') h = 'Disegna col dito: diventa una forma con lati misurabili';
-    else h = 'Tocca un lato o una forma per le misure · trascina per spostare · 2 dita: zoom';
+    else h = 'Tocca un lato per selezionarlo e misurarlo · tocca dentro per selezionare tutta la forma';
   }
   $('#hint').textContent = h;
 }
@@ -1360,16 +1430,23 @@ function drawShape(s){
   if(s.closed){ ctx.fillStyle = sel ? 'rgba(31,111,235,.13)' : 'rgba(31,111,235,.06)'; ctx.fill('evenodd'); }
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   ctx.lineWidth = sel ? 3 : 2; ctx.strokeStyle = sel ? '#1f6feb' : '#243042'; ctx.stroke();
+  if(selSide && selSide.id === s.id && s.pts[selSide.i]){
+    // lato selezionato da solo: evidenziato in arancione
+    const A = ws(s.pts[selSide.i]), B = ws(s.pts[(selSide.i + 1) % s.pts.length]);
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y);
+    ctx.strokeStyle = 'rgba(245,158,11,.35)'; ctx.lineWidth = 12; ctx.stroke();
+    ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 4; ctx.stroke();
+  }
   if(s.geo) return;
   s.pts.map(ws).forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, sel ? 5.5 : 3.5, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = sel ? '#1f6feb' : '#243042'; ctx.stroke(); });
 }
 function drawLabels(s){
-  const n = s.pts.length, sel = s.id === selShape;
+  const n = s.pts.length, sel = s.id === selShape, sideSel = selSide && selSide.id === s.id ? selSide.i : -1;
   const C = ws(s.closed ? centroid(s.pts) : {x: s.pts.reduce((a,p)=>a+p.x,0)/n, y: s.pts.reduce((a,p)=>a+p.y,0)/n});
   // si mostrano solo le misure scritte da te: i lati senza misura restano vuoti (con "?" se la forma è selezionata)
   if(s.geo){
     const all = D.scale && geoAllMeasured(s);
-    if(!all){ if(sel) pill('tocca per le misure', C.x, C.y + (showArea ? 24 : 0), 0, '#6b7686'); return; }
+    if(!all){ if(sel || sideSel >= 0) pill('tocca per le misure', C.x, C.y + (showArea ? 24 : 0), 0, '#6b7686'); return; }
     if(isCurved(s)){ pill(SH[s.geo.t].lab(s.geo.p), C.x, C.y + (showArea ? 24 : 0), 0, '#1b2330', null, true); return; }
   }
   for(let i=0;i<segCount(s);i++){
@@ -1379,7 +1456,7 @@ function drawLabels(s){
     let text, color, bold = true;
     if(s.geo){ text = fmtLen(cm); color = '#1b2330'; }
     else if(m != null){ const bad = cm != null && Math.abs(cm - m) / m > 0.005; text = fmtLen(m); color = bad ? '#d93a3a' : '#1b2330'; }
-    else { if(!sel) continue; text = '?'; color = '#9aa4b2'; bold = false; }
+    else { if(!sel && i !== sideSel) continue; text = '?'; color = i === sideSel ? '#b45309' : '#9aa4b2'; bold = i === sideSel; }
     const mid = {x:(A.x+B.x)/2, y:(A.y+B.y)/2};
     let nx = -(B.y-A.y)/sl, ny = (B.x-A.x)/sl;
     if(nx*(mid.x-C.x) + ny*(mid.y-C.y) < 0){ nx = -nx; ny = -ny; }
@@ -1496,12 +1573,14 @@ function onDown(p){
   } else {
     if(mergePick){ act = {type:'mergepick', down:p, moved:false}; return; }
     const hv = hitVertex(p);
-    if(hv){ selShape = hv.shape.id; act = {type:'vertex', down:p, moved:false, shape:hv.shape, idx:hv.idx}; return; }
+    if(hv){ selShape = hv.shape.id; selSide = null; act = {type:'vertex', down:p, moved:false, shape:hv.shape, idx:hv.idx}; return; }
     const hs = hitSegment(p);
-    if(hs){ selShape = hs.shape.id; act = {type:'seg', down:p, moved:false, shape:hs.shape, idx:hs.idx, last:w}; return; }
+    // tocco su un lato: si seleziona solo quel lato
+    if(hs){ selSide = {id:hs.shape.id, i:hs.idx}; selShape = null; act = {type:'seg', down:p, moved:false, shape:hs.shape, idx:hs.idx, last:w}; return; }
+    // tocco dentro la forma: si seleziona tutta la forma
     const sh = hitShape(p);
-    if(sh){ selShape = sh.id; act = {type:'move', down:p, moved:false, shape:sh, last:w}; renderResult(); return; }
-    selShape = null; renderResult();
+    if(sh){ selShape = sh.id; selSide = null; act = {type:'move', down:p, moved:false, shape:sh, last:w}; renderResult(); return; }
+    selShape = null; selSide = null; renderResult();
     act = {type:'pan', down:p, view0:{...view}, moved:false};
   }
 }
@@ -1905,19 +1984,34 @@ function up3D(p){
 
 /* ---- comandi 3D ---- */
 const solidIconCache = {};
+/* anteprima del solido come disegno SVG dentro la pagina (niente immagini generate:
+   così si vede uguale su PC, telefono e nell'app) */
 function solidIcon(t){
   if(solidIconCache[t]) return solidIconCache[t];
-  const c = document.createElement('canvas'); c.width = 240; c.height = 176;
-  const x = c.getContext('2d'), so = {id:'x', t, p:{...SOL[t].def}};
-  x.scale(2, 2);
+  const W = 120, H = 88, so = {id:'x', t, p:{...SOL[t].def}};
   const sc = buildScene([so]), cm = {yaw:-0.5, pitch:0.45, k:1, px:0, py:0};
-  fitCam(cm, 120, 88, sc); cm.py -= 2;
-  render3D(x, 120, 88, cm, {solids:[so], labels:false, grid:false, bg:'#ffffff', sel:null});
-  return solidIconCache[t] = c.toDataURL();
+  fitCam(cm, W, H, sc); cm.py -= 2;
+  const P = mkProj(W, H, cm, sc), L1 = [-0.42, 0.72, -0.55], L2 = [0.6, 0.2, -0.77], faces = [];
+  sc.items.forEach(it => it.F.forEach(f => {
+    const nv = P.n(f.n), pr = f.p.map(P), m = pr.length;
+    const cx = pr.reduce((a,q) => a + q.X0, 0)/m, cu = pr.reduce((a,q) => a + q.U0, 0)/m, cd = pr.reduce((a,q) => a + q.d, 0)/m;
+    if(nv[0]*cx + nv[1]*cu + nv[2]*(cd + P.Dc) >= 0) return;
+    const I = Math.min(1, Math.max(0, nv[0]*L1[0] + nv[1]*L1[1] + nv[2]*L1[2])*0.8 + Math.max(0, nv[0]*L2[0] + nv[1]*L2[1] + nv[2]*L2[2])*0.3);
+    faces.push({f, pr, hr: f.h ? f.h.map(r => r.map(P)) : [], d: Math.hypot(cx, cu, cd + P.Dc), I});
+  }));
+  faces.sort((a,b) => b.d - a.d);
+  const n = v => v.toFixed(1);
+  const body = faces.map(fc => {
+    const k = 0.42 + 0.58*fc.I, col = PALETTE[0].map(v => Math.round(v*k + 255*(1-k)*0.22)).join(',');
+    const d = [fc.pr, ...fc.hr].map(r => 'M' + r.map(q => n(q.x) + ' ' + n(q.y)).join('L') + 'Z').join('');
+    const st = fc.f.e ? 'rgba(20,30,50,.55)' : `rgb(${col})`;
+    return `<path d="${d}" fill="rgb(${col})" fill-rule="evenodd" stroke="${st}" stroke-width="${fc.f.e ? 0.8 : 0.4}" stroke-linejoin="round"/>`;
+  }).join('');
+  return solidIconCache[t] = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 }
 $('#s3Add').onclick = () => {
   openModal(`<h3>Aggiungi un solido</h3><p>Scegli la forma, poi scrivi le sue misure: il volume viene calcolato subito.</p>
-    <div class="pick-grid">${SOL_ORDER.map(t => `<button class="pick" data-t="${t}"><img alt="" src="${solidIcon(t)}">${esc(SOL[t].nm)}</button>`).join('')}</div>
+    <div class="pick-grid">${SOL_ORDER.map(t => `<button class="pick" data-t="${t}">${solidIcon(t)}${esc(SOL[t].nm)}</button>`).join('')}</div>
     <div class="mrow"><button class="btn ghost" id="pkClose">Chiudi</button></div>`, null, true);
   $('#pkClose').onclick = closeModal;
   $('#modalBox').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { closeModal(); openSolidForm({id:uid(), t:b.dataset.t, p:{...SOL[b.dataset.t].def}, name:''}, true); });
@@ -2217,7 +2311,7 @@ document.addEventListener('keydown', e => {
   if(!D || !$('#modal').classList.contains('hidden')) return;
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); }
   else if(e.key === 'Delete' || e.key === 'Backspace'){ deleteSelected(); }
-  else if(e.key === 'Escape'){ if(draft.length) return cancelDraft(); selShape = null; selSolid = null; mergePick = null; refresh(); }
+  else if(e.key === 'Escape'){ if(draft.length) return cancelDraft(); selShape = null; selSide = null; selSolid = null; mergePick = null; refresh(); }
   else if(e.key === 'Enter' && draft.length){ finishDraft(false); }
   else if(mode === '2d'){
     if(e.key === 'v') setTool('select'); else if(e.key === 'l') setTool('line'); else if(e.key === 'f') setTool('free');
@@ -2226,6 +2320,7 @@ document.addEventListener('keydown', e => {
 });
 
 renderHome();
+$("#verTag").textContent = "Versione " + APP_VERSION;
 initRemote();
 </script>
 </body>
