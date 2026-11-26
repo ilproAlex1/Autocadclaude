@@ -63,6 +63,16 @@ input,select{-webkit-user-select:text;user-select:text}
 #stage{flex:1;position:relative;touch-action:none;overflow:hidden;background:#fbfcfe}
 #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
 .hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(27,35,48,.84);color:#fff;font-size:13px;padding:7px 13px;border-radius:20px;max-width:calc(100% - 80px);text-align:center;pointer-events:none;line-height:1.35}
+.rot-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:min(94%,440px);background:#fff;padding:10px 12px;border-radius:14px;display:flex;flex-direction:column;gap:8px;z-index:5}
+.rot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:15px}
+.rot-val{display:flex;align-items:center;gap:4px;font-weight:650}
+.rot-val .inp{width:84px;padding:6px 8px;text-align:right}
+.rot-bar input[type=range]{width:100%;accent-color:#1f6feb;height:28px}
+.rot-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between;align-items:center}
+.rot-row .btn.sm{padding:7px 9px;font-size:13px}
+.rot-steps{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.rot-steps .btn.sm{padding:8px 0;font-size:12.5px;text-align:center}
+.rot-note{font-size:12px;color:var(--mut, #6b7686)}
 .draft-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:#fff;padding:6px;border-radius:14px;white-space:nowrap}
 .zoom-ctrls{position:absolute;right:10px;top:54px;display:flex;flex-direction:column;gap:6px}
 .zoom-ctrls button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:20px;cursor:pointer;color:var(--txt);display:flex;align-items:center;justify-content:center}
@@ -167,6 +177,17 @@ input,select{-webkit-user-select:text;user-select:text}
     <div id="selBar" class="draft-bar shadow hidden">
       <button class="btn sm" id="sMerge">🔗 Unisci con un’altra forma</button>
       <button class="btn sm ghost" id="sMergeX">Annulla</button>
+      <button class="btn sm" id="sRot">⟳ Ruota</button>
+    </div>
+    <div id="rotBar" class="rot-bar shadow hidden">
+      <div class="rot-head"><b>Ruota forma</b><span class="rot-val"><input id="rDeg" class="inp" inputmode="decimal" autocomplete="off" value="0" aria-label="Gradi di rotazione"><span>°</span></span></div>
+      <input id="rRange" type="range" min="-180" max="180" step="1" value="0" aria-label="Rotazione">
+      <div class="rot-steps">
+        <button class="btn sm" data-rd="-90">↺ 90°</button><button class="btn sm" data-rd="-15">↺ 15°</button><button class="btn sm" data-rd="-1">↺ 1°</button>
+        <button class="btn sm" data-rd="1">↻ 1°</button><button class="btn sm" data-rd="15">↻ 15°</button><button class="btn sm" data-rd="90">↻ 90°</button>
+      </div>
+      <div class="rot-row"><span class="rot-note">Positivo = senso orario. Le misure restano uguali.</span>
+        <span style="display:flex;gap:6px"><button class="btn sm ghost" id="rCancel">Annulla</button><button class="btn sm primary" id="rOk">Fatto</button></span></div>
     </div>
     <div id="result" class="result shadow hidden"></div>
   </div>
@@ -847,6 +868,7 @@ function save(){ if(!D) return; D.updated = Date.now(); persist(); }
 function pushHistory(){ history.push(JSON.stringify({shapes:D.shapes, scale:D.scale, solids:D.solids, unit:D.unit})); if(history.length > 80) history.shift(); }
 function undo(){
   if(draft.length){ if(draftFrom && draft.length <= 2) return cancelDraft(); draft.pop(); if(!draft.length) rubber = null; refresh(); return; }
+  if(rotEdit){ endRotate(false); return; } // Annulla durante la rotazione = rimette la forma com'era
   const h = history.pop(); if(!h) return toast('Niente da annullare');
   const o = JSON.parse(h); D.shapes = o.shapes; D.scale = o.scale; D.solids = o.solids || [];
   if(o.unit && o.unit !== D.unit){ if(cam && cam.k) cam.k *= UNIT_F[o.unit] / UNIT_F[D.unit]; setUnit(o.unit); }
@@ -1393,13 +1415,68 @@ function updateHint(){
 }
 $('#sMerge').onclick = () => { if(mergePick) return; mergePick = selShape; refresh(); };
 $('#sMergeX').onclick = () => { mergePick = null; refresh(); };
+
+/* ---- RUOTA tutta la forma, dell'angolo che vuoi, attorno al suo centro ---- */
+let rotEdit = null; // {id, base:(forma prima della rotazione, in JSON), ang}
+function rotatedCopy(base, ang){
+  const s = JSON.parse(base);
+  if(s.geo){ s.geo.rot = (s.geo.rot || 0) + ang; regen(s); return s; }
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  s.pts.forEach(q => { x0=Math.min(x0,q.x); y0=Math.min(y0,q.y); x1=Math.max(x1,q.x); y1=Math.max(y1,q.y); });
+  const cx = (x0+x1)/2, cy = (y0+y1)/2, a = ang*Math.PI/180, c = Math.cos(a), sn = Math.sin(a);
+  const tr = q => { const x = q.x - cx, y = q.y - cy; return {...q, x:cx + x*c - y*sn, y:cy + x*sn + y*c}; };
+  s.pts = s.pts.map(tr); s.holes = (s.holes || []).map(r => r.map(tr));
+  return s;
+}
+function startRotate(){
+  const s = D.shapes.find(x => x.id === selShape); if(!s) return;
+  mergePick = null; rotEdit = {id:s.id, base:JSON.stringify(s), ang:0};
+  setRot(0); refresh();
+}
+function setRot(ang, from){
+  if(!rotEdit || !isFinite(ang)) return;
+  ang = ((ang % 360) + 540) % 360 - 180; if(ang === -180) ang = 180;   // sempre tra -180 e 180
+  ang = Math.round(ang * 100) / 100;
+  rotEdit.ang = ang;
+  const i = D.shapes.findIndex(x => x.id === rotEdit.id); if(i < 0) return;
+  D.shapes[i] = rotatedCopy(rotEdit.base, ang);
+  if(from !== 'deg') $('#rDeg').value = numStr(ang);
+  if(from !== 'range') $('#rRange').value = ang;
+  draw();
+}
+function endRotate(ok, noRefresh){
+  if(!rotEdit) return;
+  const i = D.shapes.findIndex(x => x.id === rotEdit.id);
+  if(i >= 0){
+    const rotated = D.shapes[i];
+    D.shapes[i] = JSON.parse(rotEdit.base);
+    if(ok && rotEdit.ang){ pushHistory(); D.shapes[i] = rotated; save(); }
+  }
+  rotEdit = null;
+  if(!noRefresh) refresh();
+}
+$('#sRot').onclick = startRotate;
+$('#rRange').oninput = e => setRot(+e.target.value, 'range');
+$('#rDeg').oninput = e => { const v = parseNum(e.target.value); if(isFinite(v)) setRot(v, 'deg'); };
+$('#rDeg').onkeydown = e => { if(e.key === 'Enter') endRotate(true); if(e.key === 'Escape') endRotate(false); };
+$('#rDeg').onfocus = e => e.target.select();
+document.querySelectorAll('[data-rd]').forEach(b => b.onclick = () => rotEdit && setRot(rotEdit.ang + (+b.dataset.rd)));
+$('#rOk').onclick = () => endRotate(true);
+$('#rCancel').onclick = () => endRotate(false);
+
 function refresh(){
+  // se cambi forma, strumento o vista mentre ruoti, la rotazione fatta resta
+  if(rotEdit && (!D || mode !== '2d' || tool !== 'select' || resultKind || selShape !== rotEdit.id)) endRotate(true, true);
+  $('#rotBar').classList.toggle('hidden', !rotEdit);
   if(mergePick3 && (!D || mode !== '3d' || !D.solids.find(s => s.id === mergePick3))) mergePick3 = null;
   $('#s3Merge').classList.toggle('on', !!mergePick3);
   if(mergePick && (!D || mode !== '2d' || tool !== 'select' || !D.shapes.find(s => s.id === mergePick))) mergePick = null;
   const selS = D && D.shapes.find(s => s.id === selShape);
-  const showSel = !!D && mode === '2d' && tool === 'select' && !resultKind && ((selS && selS.closed && D.shapes.filter(s => s.closed).length > 1) || mergePick);
+  const canMerge = !!(selS && selS.closed && D.shapes.filter(s => s.closed).length > 1);
+  const showSel = !!D && mode === '2d' && tool === 'select' && !resultKind && !rotEdit && (selS || mergePick);
   $('#selBar').classList.toggle('hidden', !showSel);
+  $('#sMerge').classList.toggle('hidden', !(canMerge || mergePick));
+  $('#sRot').classList.toggle('hidden', !!mergePick || !selS);
   $('#sMerge').textContent = mergePick ? '👆 Tocca la forma da unire' : '🔗 Unisci con un’altra forma';
   $('#sMergeX').classList.toggle('hidden', !mergePick);
   $('#draftBar').classList.toggle('hidden', !(mode === '2d' && tool === 'line' && draft.length));
