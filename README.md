@@ -1,19 +1,20 @@
 # Misure Forme
 
-Piccola app web per disegnare forme col dito (o col mouse), inserire le misure dei lati e calcolare automaticamente **area** e **perimetro**.
+App web per disegnare forme col dito (o col mouse), inserire le misure e calcolare automaticamente **aree**, **perimetri** e **volumi**, con computo metrico in PDF.
 
 **Apri l'app:** https://ilproalex1.github.io/Autocadclaude/
 
 ## Cosa fa
 
 - **Cartelle e sottocartelle** per organizzare i disegni (rinomina, elimina, duplica).
-- **Strumenti di disegno:** linee (tocca i punti o trascina), rettangolo, mano libera.
-- **Squadra:** linee dritte a 0°/45°/90° e allineamento automatico dei punti. **Griglia:** aggancio alla griglia.
-- **Misure:** tocca un lato e scrivi la lunghezza in mm, cm o m. La prima misura fissa la scala, le successive adattano la forma.
-- **Area e Perimetro** calcolati da soli, per ogni forma e in totale.
-- Zoom e spostamento con due dita, Annulla, salvataggio automatico.
+- **Strumenti 2D:** linee, mano libera e **Forme**: rettangolo, quadrato, cerchio, ellisse, ovale, semicerchio, quarto di cerchio, settore, segmento circolare, semiluna, corona circolare, mezza corona, triangoli (3 lati, equilatero, isoscele, rettangolo), trapezi, parallelogramma, rombo, pentagono, esagono, ottagono, poligono regolare, stella, forme a L, T e U.
+- **Misure:** tocca un lato (o una forma) e scrivi la misura in mm, cm, m o km. Cambiare unità converte solo i numeri: il disegno resta identico.
+- **Zoom illimitato** con due dita, rotella o pulsanti.
+- **3D:** solidi (parallelepipedo, cubo, cilindro, tubo, cono, tronco di cono, sfera, semisfera, calotta, ellissoide, piramide, tronco di piramide, prismi, toro) ed **estrusione** di una forma del disegno 2D. Volume in m³ e litri.
+- **Computo metrico PDF:** descrizione per ogni voce, disegno in scala, tabella di superfici e volumi con i totali.
+- **Account:** aperta da claude.ai, ogni persona salva i propri disegni nel proprio account (privati) e li ritrova su tutti i dispositivi. Backup esportabile/importabile in .json.
 
 ## Note
 
 - È un unico file (`index.html`), senza dipendenze: funziona anche aprendolo con doppio clic.
-- I disegni sono salvati nel browser del dispositivo (localStorage): non passano da un dispositivo all'altro.
+- Aperta da GitHub Pages o dal file, i disegni restano nel browser del dispositivo (usa il backup per spostarli).

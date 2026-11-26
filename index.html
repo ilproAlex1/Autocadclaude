@@ -16,12 +16,15 @@ input,select{-webkit-user-select:text;user-select:text}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column}
 .hidden{display:none!important}
 .bar{display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));background:#fff;border-bottom:1px solid var(--line);min-height:56px;flex-shrink:0}
-.icon-btn{width:40px;height:40px;flex-shrink:0;border:0;background:transparent;font-size:30px;line-height:1;border-radius:10px;cursor:pointer;color:var(--txt)}
+.icon-btn{width:40px;height:40px;flex-shrink:0;border:0;background:transparent;font-size:30px;line-height:1;border-radius:10px;cursor:pointer;color:var(--txt);display:flex;align-items:center;justify-content:center}
+.icon-btn svg{width:24px;height:24px}
 .icon-btn:active{background:var(--bg)}
-.crumbs{display:flex;gap:2px;align-items:center;overflow-x:auto;white-space:nowrap;font-weight:700;font-size:17px;scrollbar-width:none}
+.crumbs{flex:1;min-width:0;display:flex;gap:2px;align-items:center;overflow-x:auto;white-space:nowrap;font-weight:700;font-size:17px;scrollbar-width:none}
 .crumbs button{border:0;background:none;font:inherit;color:var(--acc);padding:6px 4px;cursor:pointer}
 .crumbs .sep{color:var(--mut);font-weight:400}
 .crumbs .cur{color:var(--txt);padding:6px 4px}
+.acct{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 11px;font:inherit;font-size:13px;font-weight:650;color:var(--mut);cursor:pointer;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct.cloud{color:var(--ok);border-color:#bfe8cf;background:#f0fbf4}
 .list{flex:1;overflow-y:auto;padding:16px;padding-bottom:130px}
 .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin:4px 2px 10px;font-weight:700}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px}
@@ -47,11 +50,15 @@ input,select{-webkit-user-select:text;user-select:text}
 .btn.danger.solid{background:var(--danger);border-color:var(--danger);color:#fff}
 .btn.ghost{background:transparent;border-color:transparent}
 .btn.sm{padding:8px 12px;font-size:14px}
+.btn:disabled{opacity:.5}
 .shadow{box-shadow:0 4px 14px rgba(20,30,50,.12)}
 /* editor */
 .title-btn{flex:1;min-width:0;text-align:left;border:0;background:none;font:inherit;font-weight:700;font-size:17px;padding:6px 4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)}
-.title-btn small{display:block;font-weight:400;font-size:12px;color:var(--mut)}
-.unit-sel{font:inherit;font-size:15px;font-weight:650;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--txt)}
+.title-btn small{display:block;font-weight:400;font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
+.unit-sel{font:inherit;font-size:15px;font-weight:650;padding:7px 6px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--txt);flex-shrink:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-shrink:0}
+.seg button{border:0;background:#fff;font:inherit;font-weight:700;font-size:14px;padding:8px 9px;cursor:pointer;color:var(--mut)}
+.seg button.on{background:var(--acc);color:#fff}
 #stage{flex:1;position:relative;touch-action:none;overflow:hidden;background:#fbfcfe}
 #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
 .hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(27,35,48,.84);color:#fff;font-size:13px;padding:7px 13px;border-radius:20px;max-width:calc(100% - 80px);text-align:center;pointer-events:none;line-height:1.35}
@@ -60,13 +67,14 @@ input,select{-webkit-user-select:text;user-select:text}
 .zoom-ctrls button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:20px;cursor:pointer;color:var(--txt);display:flex;align-items:center;justify-content:center}
 .zoom-ctrls svg{width:20px;height:20px}
 .tools{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:5px 6px;padding-bottom:max(6px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);flex-shrink:0}
+.tools.t4{grid-template-columns:repeat(4,1fr)}
 .tool{border:0;background:transparent;border-radius:10px;padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--mut);cursor:pointer;font-family:inherit}
 .tool svg{width:24px;height:24px}
 .tool.on{background:var(--acc-soft);color:var(--acc)}
 .tool.toggle.on{background:#e7f7ee;color:var(--ok)}
 .tool:active{background:var(--bg)}
 .tool.danger{color:var(--danger)}
-.result{position:absolute;left:10px;right:10px;bottom:10px;max-width:460px;margin:0 auto;background:#fff;border-radius:16px;padding:14px 16px;max-height:55%;overflow-y:auto}
+.result{position:absolute;left:10px;right:10px;bottom:10px;max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:14px 16px;max-height:55%;overflow-y:auto}
 .result h4{margin:0 0 8px;font-size:16px;display:flex;justify-content:space-between;align-items:center}
 .result h4 button{border:0;background:var(--bg);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}
 .result .row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
@@ -77,12 +85,13 @@ input,select{-webkit-user-select:text;user-select:text}
 .result .note{color:var(--mut);font-size:14px;line-height:1.45}
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(10,15,25,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50}
-.modal-box{background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));animation:up .18s ease-out}
+.modal-box{background:#fff;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));animation:up .18s ease-out}
+.modal-box.wide{max-width:620px}
 @keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
 @media(min-width:600px){.modal{align-items:center}.modal-box{border-radius:20px}}
 .modal-box h3{margin:0 0 6px;font-size:19px}
 .modal-box p{margin:0 0 12px;color:var(--mut);font-size:14px;line-height:1.45}
-.inp{width:100%;font-size:19px;padding:12px;border:1.5px solid var(--line);border-radius:12px;font-family:inherit;outline:none}
+.inp{width:100%;font-size:19px;padding:12px;border:1.5px solid var(--line);border-radius:12px;font-family:inherit;outline:none;background:#fff;color:var(--txt)}
 .inp:focus{border-color:var(--acc)}
 .mrow{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap}
 .mrow.left{justify-content:space-between}
@@ -91,8 +100,27 @@ input,select{-webkit-user-select:text;user-select:text}
 .in-row select{font-size:18px;padding:0 10px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-family:inherit}
 .sheet-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .sheet-actions .btn{width:100%;text-align:center}
-.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.quick button{border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:6px 11px;font-size:13px;cursor:pointer;font-family:inherit}
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fld label{font-size:13px;color:var(--mut);font-weight:650}
+.fld .inp{font-size:17px;padding:10px 12px}
+.in-suf{display:flex;align-items:center;gap:8px}
+.in-suf .inp{flex:1}
+.suf{font-weight:700;color:var(--mut);min-width:26px}
+.err{background:#fdecec;color:var(--danger);border-radius:10px;padding:8px 11px;font-size:14px;margin-top:4px}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:6px}
+.pick{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt);text-align:center;line-height:1.2}
+.pick svg,.pick img{width:60px;height:44px;display:block}
+.pick.on{border-color:var(--acc);background:var(--acc-soft)}
+.pick:active{transform:scale(.97)}
+.cm-list{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
+.cm-row{display:flex;align-items:center;gap:8px}
+.cm-n{width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cm-n.v3{background:#f59e0b}
+.cm-row .inp{flex:1;min-width:0;font-size:15px;padding:9px 10px}
+.cm-v{min-width:92px;text-align:right;font-weight:700;font-size:14px}
+.cm-v small{display:block;font-weight:400;color:var(--mut);font-size:11px}
+.cm-tot{display:flex;justify-content:space-between;font-weight:800;font-size:16px;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.cm-h{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:700;margin:12px 0 2px}
 </style>
 </head>
 <body>
@@ -102,6 +130,7 @@ input,select{-webkit-user-select:text;user-select:text}
   <header class="bar">
     <button id="btnUp" class="icon-btn" aria-label="Indietro">‹</button>
     <div class="crumbs" id="crumbs"></div>
+    <button id="acct" class="acct" title="Account e salvataggio">📱 Su questo dispositivo</button>
   </header>
   <main id="list" class="list"></main>
   <div class="home-actions"><button id="btnNewFolder" class="btn shadow">📁 Nuova cartella</button></div>
@@ -113,9 +142,11 @@ input,select{-webkit-user-select:text;user-select:text}
   <header class="bar">
     <button id="btnBack" class="icon-btn" aria-label="Indietro">‹</button>
     <button id="title" class="title-btn"></button>
+    <div class="seg" id="modeSeg"><button data-mode="2d">2D</button><button data-mode="3d">3D</button></div>
     <select id="unitSel" class="unit-sel" aria-label="Unità di misura">
-      <option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option>
+      <option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="km">km</option>
     </select>
+    <button id="btnPdf" class="icon-btn" aria-label="Computo metrico e PDF" title="Computo metrico e PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h4.5"/></svg></button>
   </header>
   <div id="stage">
     <canvas id="cv"></canvas>
@@ -133,10 +164,10 @@ input,select{-webkit-user-select:text;user-select:text}
     </div>
     <div id="result" class="result shadow hidden"></div>
   </div>
-  <nav class="tools">
+  <nav class="tools" id="tools2d">
     <button class="tool" data-tool="select"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3l13 8-6 1.5L9 19z"/></svg>Seleziona</button>
     <button class="tool" data-tool="line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 19L9 6l7 9 4-10"/><circle cx="4" cy="19" r="1.6" fill="currentColor"/><circle cx="9" cy="6" r="1.6" fill="currentColor"/><circle cx="16" cy="15" r="1.6" fill="currentColor"/><circle cx="20" cy="5" r="1.6" fill="currentColor"/></svg>Linee</button>
-    <button class="tool" data-tool="rect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>Rettangolo</button>
+    <button class="tool" id="tShape"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="4.5"/><path d="M16.5 3l5 8.5h-10z"/><rect x="11" y="14" width="10" height="7" rx="1"/><path d="M3 21a5 5 0 0110 0z"/></svg>Forme</button>
     <button class="tool" data-tool="free"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17c3-6 5-9 7-7s-1 7 2 7 4-9 9-11"/></svg>Mano libera</button>
     <button class="tool" id="tUndo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Annulla</button>
     <button class="tool" id="tArea"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18L8 5h12l-3 13z" fill="currentColor" fill-opacity=".25"/></svg>Area</button>
@@ -145,19 +176,31 @@ input,select{-webkit-user-select:text;user-select:text}
     <button class="tool toggle" id="tGrid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4zM9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16"/></svg>Griglia</button>
     <button class="tool danger" id="tDel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Elimina</button>
   </nav>
+  <nav class="tools t4 hidden" id="tools3d">
+    <button class="tool" id="s3Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>Aggiungi solido</button>
+    <button class="tool" id="s3Ext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17h10l6-4H10z" fill="currentColor" fill-opacity=".2"/><path d="M10 13V5M7 8l3-3 3 3"/></svg>Estrudi forma</button>
+    <button class="tool" id="s3Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Misure</button>
+    <button class="tool" id="s3Vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 4h12l-1.5 16h-9z"/><path d="M7 11h10" /><path d="M7.3 11h9.4l-.8 9H8.1z" fill="currentColor" fill-opacity=".3"/></svg>Volume</button>
+    <button class="tool" id="s3Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Annulla</button>
+    <button class="tool" id="s3View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Vista</button>
+    <button class="tool" id="s3Dup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg>Duplica</button>
+    <button class="tool danger" id="s3Del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Elimina</button>
+  </nav>
 </div>
 
 <div id="modal" class="modal hidden"><div class="modal-box" id="modalBox"></div></div>
+<input type="file" id="fileIn" accept=".json,application/json" class="hidden">
 
 <script>
 'use strict';
 /* =================== DATI =================== */
 const LS_KEY = 'misure_forme_v1';
 const OPT_KEY = 'misure_forme_opts';
+const OWNER_KEY = 'misure_forme_owner';
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 let db = loadDB();
-let opts = {ortho:true, grid:false, unit:'cm'};
+let opts = {ortho:true, grid:false, unit:'cm', shape:'rect'};
 try{ Object.assign(opts, JSON.parse(lsGet(OPT_KEY) || '{}')); }catch(e){}
 
 function loadDB(){
@@ -168,19 +211,21 @@ function persist(){ lsSet(LS_KEY, JSON.stringify(db)); scheduleSync(); }
 function saveOpts(){ lsSet(OPT_KEY, JSON.stringify(opts)); }
 
 /* ---- Salvataggio nel tuo account (quando l'app è aperta su claude.ai) ----
-   Ogni persona ha uno spazio privato: data/users/<id>/
-   doc "folders" = elenco cartelle, doc "dw_<id>" = un disegno. */
-let remote = null, synced = {}, syncTimer = null, syncing = false, syncAgain = false;
+   Ogni persona ha uno spazio privato: data/users/<id>/ — nessun altro lo può leggere,
+   nemmeno chi ha creato l'app. doc "folders" = elenco cartelle, doc "dw_<id>" = un disegno. */
+let remote = null, synced = {}, syncTimer = null, syncing = false, syncAgain = false, dl = null;
+let acct = {state:'local', name:''};
 function remoteDocs(){
   const out = {folders: JSON.stringify({folders: db.folders})};
   db.drawings.forEach(d => { out['dw_' + d.id] = JSON.stringify(d); });
   return out;
 }
-function scheduleSync(){ if(!remote) return; clearTimeout(syncTimer); syncTimer = setTimeout(runSync, 700); }
+function scheduleSync(){ if(!remote) return; clearTimeout(syncTimer); syncTimer = setTimeout(runSync, 700); setAcct('syncing'); }
 async function runSync(){
   if(!remote) return;
   if(syncing){ syncAgain = true; return; }
   syncing = true;
+  let ok = true;
   try{
     const want = remoteDocs();
     for(const id in want){
@@ -190,59 +235,94 @@ async function runSync(){
     for(const id in synced){
       if(!(id in want)){ await remote.doc(id).delete(); delete synced[id]; }
     }
-  }catch(e){ console.warn('Sincronizzazione non riuscita', e); toastHome('Salvataggio online non riuscito: i dati restano su questo dispositivo'); }
+  }catch(e){ ok = false; console.warn('Sincronizzazione non riuscita', e); if(D) toast('Salvataggio online non riuscito: i dati restano su questo dispositivo'); }
   syncing = false;
-  if(syncAgain){ syncAgain = false; runSync(); }
+  if(syncAgain){ syncAgain = false; runSync(); return; }
+  setAcct(ok ? 'cloud' : 'error');
 }
-function toastHome(m){ if(typeof toast === 'function' && D) toast(m); else console.info(m); }
+function setAcct(state){
+  if(state) acct.state = state;
+  const b = $('#acct');
+  b.classList.toggle('cloud', acct.state === 'cloud' || acct.state === 'syncing');
+  b.textContent = acct.state === 'local' ? '📱 Su questo dispositivo'
+    : acct.state === 'error' ? '⚠️ Non sincronizzato'
+    : acct.state === 'syncing' ? '☁️ Salvataggio…'
+    : '☁️ ' + (acct.name || 'Il mio account');
+}
+async function pullRemote(){
+  const snap = await Promise.race([remote.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
+  const next = {folders:[], drawings:[]}; const s2 = {};
+  snap.docs.forEach(d => {
+    const v = d.data(); if(!v) return;
+    if(d.id === 'folders'){ next.folders = Array.isArray(v.folders) ? v.folders : []; s2.folders = JSON.stringify({folders: next.folders}); }
+    else if(d.id.startsWith('dw_') && Array.isArray(v.shapes)){ next.drawings.push(v); s2[d.id] = JSON.stringify(v); }
+  });
+  return {empty: snap.empty, next, s2};
+}
 async function initRemote(){
   if(!window.claude || !window.claude.use) return;
+  claude.use('downloads').then(x => { dl = x; }).catch(() => {});
   try{
     const [dbc, user] = await Promise.all([claude.use('db'), claude.use('user')]);
     if(!dbc || !user) return;
     const id = await user.id(); if(!id) return;
-    const col = dbc.collection('data/users/' + id);
-    const snap = await Promise.race([col.get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
-    remote = col;
-    if(snap.empty){
-      // primo avvio online: porta su quello che c'è già su questo dispositivo
+    try{ const me = await user.me(); acct.name = (me && me.name) || ''; }catch(e){}
+    remote = dbc.collection('data/users/' + id);
+    const owner = lsGet(OWNER_KEY);
+    const r = await pullRemote();
+    lsSet(OWNER_KEY, id);
+    if(r.empty){
+      // primo avvio online: porta su quello che c'è su questo dispositivo (solo se è tuo)
+      if(owner && owner !== id){ db = {folders:[], drawings:[]}; lsSet(LS_KEY, JSON.stringify(db)); if(!D){ curFolder = null; renderHome(); } }
+      setAcct('cloud');
       if(db.folders.length || db.drawings.length) runSync();
       return;
     }
-    const next = {folders:[], drawings:[]};
-    snap.docs.forEach(d => {
-      const v = d.data(); if(!v) return;
-      if(d.id === 'folders'){ next.folders = Array.isArray(v.folders) ? v.folders : []; synced.folders = JSON.stringify({folders: next.folders}); }
-      else if(d.id.startsWith('dw_') && Array.isArray(v.shapes)){ next.drawings.push(v); synced[d.id] = JSON.stringify(v); }
-    });
+    synced = r.s2; setAcct('cloud');
     if(D) return;                 // non interrompere un disegno già aperto
-    db = next; lsSet(LS_KEY, JSON.stringify(db));
+    db = r.next; lsSet(LS_KEY, JSON.stringify(db));
     if(curFolder && !db.folders.find(f => f.id === curFolder)) curFolder = null;
     renderHome();
-  }catch(e){ console.warn('Archivio online non disponibile', e); }
+  }catch(e){ console.warn('Archivio online non disponibile', e); remote = null; setAcct('local'); }
 }
+// quando torni sull'app (es. dopo aver lavorato dal PC) ricarica gli ultimi dati del tuo account
+document.addEventListener('visibilitychange', async () => {
+  if(document.visibilityState !== 'visible' || !remote || D || syncing || syncTimer && acct.state === 'syncing') return;
+  try{
+    const r = await pullRemote(); if(D || r.empty) return;
+    synced = r.s2; db = r.next; lsSet(LS_KEY, JSON.stringify(db));
+    if(curFolder && !db.folders.find(f => f.id === curFolder)) curFolder = null;
+    renderHome();
+  }catch(e){}
+});
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 /* =================== UNITÀ =================== */
-const UNIT_F = {mm:10, cm:1, m:0.01};   // da cm a unità
-const UNIT_DEC = {mm:0, cm:1, m:2};
+const UNITS = ['mm','cm','m','km'];
+const UNIT_F = {mm:10, cm:1, m:0.01, km:0.00001};   // da cm a unità
+const UNIT_DEC = {mm:0, cm:1, m:2, km:3};
 const nf = (v, dec, min=0) => v.toLocaleString('it-IT', {maximumFractionDigits:dec, minimumFractionDigits:min});
+const numStr = v => v.toLocaleString('it-IT', {maximumFractionDigits:4, useGrouping:false});
 function fromCm(cm, u){ return cm * UNIT_F[u]; }
 function toCm(v, u){ return v / UNIT_F[u]; }
 function fmtLen(cm, u){ u = u || D.unit; return nf(fromCm(cm,u), UNIT_DEC[u], u==='m'?2:0) + ' ' + u; }
 function fmtArea(cm2, u){
   u = u || D.unit;
+  if(u==='km') return nf(cm2/1e10, 4) + ' km²';
   if(u==='m') return nf(cm2/1e4, 2, 2) + ' m²';
   if(u==='cm') return nf(cm2, 1) + ' cm²';
   return nf(cm2*100, 0) + ' mm²';
 }
+const fmtVol = cm3 => nf(cm3/1e6, 3, 3) + ' m³';
+const fmtLitri = cm3 => nf(cm3/1000, 1) + ' litri';
 function parseNum(s){ const v = parseFloat(String(s).replace(/\s/g,'').replace(',', '.')); return isFinite(v) ? v : NaN; }
 
 /* =================== MODALI =================== */
 let modalCancel = null;
-function openModal(html, onCancel){ $('#modalBox').innerHTML = html; $('#modal').classList.remove('hidden'); modalCancel = onCancel || null; }
+function openModal(html, onCancel, wide){ $('#modalBox').innerHTML = html; $('#modalBox').classList.toggle('wide', !!wide); $('#modal').classList.remove('hidden'); modalCancel = onCancel || null; }
 function closeModal(){ $('#modal').classList.add('hidden'); $('#modalBox').innerHTML=''; modalCancel = null; }
 $('#modal').addEventListener('pointerdown', e => { if(e.target.id === 'modal'){ const c = modalCancel; closeModal(); if(c) c(); } });
 
@@ -265,10 +345,61 @@ function askConfirm(title, msg, okLabel='Elimina'){
     $('#mOk').onclick = () => { closeModal(); res(true); };
   });
 }
-function actionSheet(title, actions){
-  openModal(`<h3>${esc(title)}</h3><div class="sheet-actions">${actions.map((a,i)=>`<button class="btn ${a.danger?'danger':''}" data-i="${i}">${esc(a.label)}</button>`).join('')}
-    <button class="btn ghost" data-i="-1">Annulla</button></div>`);
+function actionSheet(title, actions, desc){
+  openModal(`<h3>${esc(title)}</h3>${desc?`<p>${desc}</p>`:''}<div class="sheet-actions">${actions.map((a,i)=>`<button class="btn ${a.danger?'danger':''}" data-i="${i}">${esc(a.label)}</button>`).join('')}
+    <button class="btn ghost" data-i="-1">Chiudi</button></div>`);
   $('#modalBox').querySelectorAll('button').forEach(b => b.onclick = () => { closeModal(); const i = +b.dataset.i; if(i >= 0) actions[i].fn(); });
+}
+
+/* Modulo generico per inserire le misure di una forma o di un solido.
+   fields: [{k, n, t:'len'|'ang'|'int'|'sel', v, opts}] — le lunghezze sono in cm. */
+function paramForm(o){
+  let u = D.unit;
+  const lenVal = (f) => f.v == null ? '' : numStr(fromCm(f.v, u));
+  const fh = o.fields.map((f,i) => {
+    if(f.t === 'sel') return `<div class="fld"><label for="pf${i}">${esc(f.n)}</label><select id="pf${i}" class="inp">${f.opts.map(([v,l]) => `<option value="${esc(v)}" ${v===f.v?'selected':''}>${esc(l)}</option>`).join('')}</select></div>`;
+    const val = f.t === 'len' ? lenVal(f) : (f.v == null ? '' : numStr(f.v));
+    const suf = f.t === 'len' ? `<span class="suf" data-suf>${u}</span>` : f.t === 'ang' ? '<span class="suf">°</span>' : '<span class="suf"></span>';
+    return `<div class="fld"><label for="pf${i}">${esc(f.n)}</label><div class="in-suf"><input id="pf${i}" class="inp" inputmode="${f.t==='int'?'numeric':'decimal'}" autocomplete="off" placeholder="${f.t==='len'?'es. 3,50':''}" value="${val}">${suf}</div></div>`;
+  }).join('');
+  const hasLen = o.fields.some(f => f.t === 'len');
+  openModal(`<h3>${esc(o.title)}</h3>${o.desc ? `<p>${o.desc}</p>` : ''}
+    ${hasLen ? `<div class="fld"><label for="pfU">Unità di misura</label><select id="pfU" class="inp">${UNITS.map(x => `<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></div>` : ''}
+    ${fh}
+    ${o.rot != null ? `<div class="fld"><label for="pfR">Rotazione</label><div class="in-suf"><input id="pfR" class="inp" inputmode="decimal" autocomplete="off" value="${numStr(o.rot)}"><span class="suf">°</span></div></div>` : ''}
+    ${o.name ? `<div class="fld"><label for="pfN">Descrizione (per il computo)</label><input id="pfN" class="inp" maxlength="80" placeholder="${esc(o.name.ph)}" value="${esc(o.name.v||'')}"></div>` : ''}
+    <div id="pfErr" class="err hidden"></div>
+    <div class="mrow left">${o.onDel ? `<button class="btn danger" id="pfDel">${esc(o.delLabel || 'Elimina')}</button>` : '<span></span>'}
+      <span style="display:flex;gap:8px"><button class="btn ghost" id="pfCancel">Annulla</button><button class="btn primary" id="pfOk">${esc(o.okLabel || 'Salva')}</button></span></div>`);
+  const first = o.fields.findIndex(f => f.t !== 'sel');
+  if(first >= 0) setTimeout(() => { const el = $('#pf' + first); if(el){ el.focus(); el.select(); } }, 60);
+  if(hasLen) $('#pfU').onchange = e => {
+    const nu = e.target.value;
+    o.fields.forEach((f,i) => { if(f.t !== 'len') return; const el = $('#pf'+i); const v = parseNum(el.value); if(isFinite(v)) el.value = numStr(fromCm(toCm(v, u), nu)); });
+    u = nu; $('#modalBox').querySelectorAll('[data-suf]').forEach(s => s.textContent = u);
+  };
+  const showErr = m => { const e = $('#pfErr'); e.textContent = m; e.classList.remove('hidden'); };
+  $('#pfCancel').onclick = () => { closeModal(); if(o.onCancel) o.onCancel(); };
+  if(o.onDel) $('#pfDel').onclick = () => { closeModal(); o.onDel(); };
+  $('#pfOk').onclick = () => {
+    const vals = {};
+    for(let i = 0; i < o.fields.length; i++){
+      const f = o.fields[i], el = $('#pf'+i);
+      if(f.t === 'sel'){ vals[f.k] = el.value; continue; }
+      const s = el.value.trim();
+      if(!s){ vals[f.k] = null; continue; }
+      const v = parseNum(s);
+      if(!(v > 0)){ el.style.borderColor = 'var(--danger)'; el.focus(); return showErr('Controlla “' + f.n + '”: serve un numero maggiore di zero.'); }
+      vals[f.k] = f.t === 'len' ? toCm(v, u) : f.t === 'int' ? Math.round(v) : v;
+    }
+    let rot = null;
+    if(o.rot != null){ rot = parseNum($('#pfR').value || '0'); if(!isFinite(rot)) return showErr('Rotazione non valida'); }
+    const name = o.name ? $('#pfN').value.trim() : null;
+    const err = o.onSave(vals, {unit:u, rot, name});
+    if(err) return showErr(err);
+    closeModal();
+  };
+  $('#modalBox').querySelectorAll('input').forEach(el => el.addEventListener('keydown', e => { if(e.key === 'Enter') $('#pfOk').click(); if(e.key === 'Escape') $('#pfCancel').click(); }));
 }
 
 /* =================== HOME / CARTELLE =================== */
@@ -327,7 +458,7 @@ function renderHome(){
   if(draws.length){
     html += `<div class="sec-title">Disegni</div><div class="grid">` + draws.map(d =>
       `<div class="card" data-draw="${d.id}"><div class="thumb">${thumbSVG(d)}</div><div class="name">${esc(d.name)}</div>
-        <div class="meta">${new Date(d.updated).toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'})}</div>
+        <div class="meta">${new Date(d.updated).toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'})}${(d.solids||[]).length ? ' · 3D: ' + plural(d.solids.length,'solido','solidi') : ''}</div>
         <button class="more" data-dmenu="${d.id}" aria-label="Opzioni">⋯</button></div>`).join('') + `</div>`;
   }
   $('#list').innerHTML = html;
@@ -337,18 +468,15 @@ function renderHome(){
   $('#list').querySelectorAll('[data-dmenu]').forEach(el => el.onclick = e => { e.stopPropagation(); drawingMenu(el.dataset.dmenu); });
 }
 
+function ringsPath(rings, closed){ return rings.map(r => r.map((p,i) => (i?'L':'M') + p.x.toFixed(3) + ' ' + p.y.toFixed(3)).join('') + (closed ? 'Z' : '')).join(''); }
 function thumbSVG(d){
   const pts = d.shapes.flatMap(s => s.pts);
-  if(!pts.length) return `<svg viewBox="0 0 100 60"><text x="50" y="34" text-anchor="middle" font-size="9" fill="#9aa4b2">vuoto</text></svg>`;
+  if(!pts.length) return `<svg viewBox="0 0 100 60"><text x="50" y="34" text-anchor="middle" font-size="9" fill="#9aa4b2">${(d.solids||[]).length ? '3D · ' + plural(d.solids.length,'solido','solidi') : 'vuoto'}</text></svg>`;
   let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
   pts.forEach(p => { x0=Math.min(x0,p.x); y0=Math.min(y0,p.y); x1=Math.max(x1,p.x); y1=Math.max(y1,p.y); });
-  const w = Math.max(x1-x0, 1), h = Math.max(y1-y0, 1), pad = Math.max(w,h)*0.12;
+  const w = Math.max(x1-x0, 1e-9), h = Math.max(y1-y0, 1e-9), pad = Math.max(w,h)*0.12;
   const vb = `${x0-pad} ${y0-pad} ${w+pad*2} ${h+pad*2}`;
-  const body = d.shapes.map(s => {
-    const P = s.pts.map(p => p.x+','+p.y).join(' ');
-    return s.closed ? `<polygon points="${P}" fill="rgba(31,111,235,.1)" stroke="#243042" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`
-                    : `<polyline points="${P}" fill="none" stroke="#243042" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
-  }).join('');
+  const body = d.shapes.map(s => `<path d="${ringsPath([s.pts, ...(s.holes||[])], s.closed)}" fill="${s.closed?'rgba(31,111,235,.1)':'none'}" fill-rule="evenodd" stroke="#243042" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`).join('');
   return `<svg viewBox="${vb}" preserveAspectRatio="xMidYMid meet">${body}</svg>`;
 }
 
@@ -362,7 +490,7 @@ async function newFolder(parentId){
 }
 function newDrawing(folderId){
   const n = db.drawings.filter(d => d.folderId === folderId).length + 1;
-  const d = {id:uid(), name:'Disegno ' + n, folderId, shapes:[], scale:null, unit:opts.unit, created:Date.now(), updated:Date.now()};
+  const d = {id:uid(), name:'Disegno ' + n, folderId, shapes:[], solids:[], scale:null, unit:opts.unit, created:Date.now(), updated:Date.now()};
   db.drawings.push(d); persist();
   openEditor(d.id);
 }
@@ -397,29 +525,215 @@ $('#fab').onclick = async () => {
   if(f){ curFolder = f.id; renderHome(); newDrawing(f.id); }
 };
 
+/* ---- account, backup ---- */
+$('#acct').onclick = () => {
+  const cloud = !!remote;
+  const desc = cloud
+    ? `Sei collegato${acct.name ? ' come <b>' + esc(acct.name) + '</b>' : ''}. I tuoi disegni sono salvati nel <b>tuo account</b>: li ritrovi uguali sul telefono, sul tablet e sul PC aprendo l'app con lo stesso account.<br><br>Ogni persona che apre l'app con il <b>proprio</b> account ha uno spazio di lavoro tutto suo: tu non vedi i suoi disegni e lui non vede i tuoi.`
+    : `In questo momento i disegni sono salvati <b>solo su questo dispositivo</b>.<br><br>Per averli su tutti i dispositivi e con account separati apri l'app dal link di Claude (claude.ai) e accedi con il tuo account. Qui sotto puoi anche esportare un backup e importarlo su un altro dispositivo.`;
+  actionSheet(cloud ? 'Il tuo account' : 'Salvataggio', [
+    {label:'⬇️ Esporta backup (file .json)', fn: exportBackup},
+    {label:'⬆️ Importa backup', fn: () => $('#fileIn').click()},
+  ], desc);
+};
+async function exportBackup(){
+  const data = JSON.stringify({app:'misure-forme', v:2, exported:Date.now(), folders:db.folders, drawings:db.drawings});
+  await saveFile('misure-forme-backup-' + new Date().toISOString().slice(0,10) + '.json', new Blob([data], {type:'application/json'}));
+}
+$('#fileIn').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    const d = JSON.parse(await f.text());
+    if(!Array.isArray(d.folders) || !Array.isArray(d.drawings)) throw new Error('formato');
+    let nf = 0, nd = 0;
+    d.folders.forEach(x => { if(x && x.id && !db.folders.find(y => y.id === x.id)){ db.folders.push(x); nf++; } });
+    d.drawings.forEach(x => {
+      if(!x || !x.id || !Array.isArray(x.shapes)) return;
+      const i = db.drawings.findIndex(y => y.id === x.id);
+      if(i < 0){ db.drawings.push(x); nd++; } else if((x.updated||0) > (db.drawings[i].updated||0)){ db.drawings[i] = x; nd++; }
+    });
+    persist(); renderHome();
+    actionSheet('Backup importato', [], `Aggiunte ${plural(nf,'cartella','cartelle')} e ${plural(nd,'disegno','disegni')} (aggiornati o nuovi).`);
+  }catch(err){ actionSheet('Importazione non riuscita', [], 'Il file scelto non è un backup di Misure Forme.'); }
+};
+async function saveFile(name, blob){
+  if(dl){
+    try{ await dl.save({filename:name, data:blob}); return true; }
+    catch(e){
+      const c = e && e.code;
+      if(c === 'declined' || c === 'rate_limited') return false;
+      if(c === 'host_unavailable'){ actionSheet('Download non disponibile', [], "In quest'app il file non si può salvare: apri l'app dal browser o dal computer per scaricarlo."); return false; }
+    }
+  }
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
+}
+
+/* =================== FORME (2D) =================== */
+const TAU = Math.PI * 2, CN = 96;
+function arcPts(cx, cy, rx, ry, a0, a1, n){ const o = []; for(let i=0;i<=n;i++){ const a = a0 + (a1-a0)*i/n; o.push({x:cx + rx*Math.cos(a), y:cy + ry*Math.sin(a)}); } return o; }
+function circlePts(cx, cy, r){ const o = arcPts(cx, cy, r, r, 0, TAU, CN); o.pop(); return o; }
+function regPts(n, R){ const o = []; for(let k=0;k<n;k++){ const a = Math.PI/2 + Math.PI/n + TAU*k/n; o.push({x:R*Math.cos(a), y:R*Math.sin(a)}); } return o; }
+function lensArea(R, r, d){
+  if(d >= R + r) return 0;
+  if(d <= Math.abs(R - r)) return Math.PI * Math.min(R, r)**2;
+  return r*r*Math.acos((d*d + r*r - R*R)/(2*d*r)) + R*R*Math.acos((d*d + R*R - r*r)/(2*d*R))
+       - 0.5*Math.sqrt((-d+r+R)*(d+r-R)*(d-r+R)*(d+r+R));
+}
+const P_ = (q) => q.map(([x,y]) => ({x, y}));
+const Lp = (k, n) => ({k, n, t:'len'});
+const fw = v => fmtLen(v * D.scale);       // lunghezza "mondo" → testo
+function crescentGeo(p){
+  const R = p.D/2, r = p.d/2, e = p.s + r - R;
+  const x0 = (R*R - r*r + e*e)/(2*e), y0 = Math.sqrt(Math.max(0, R*R - x0*x0));
+  return {R, r, e, t1:Math.atan2(y0, x0), f0:Math.atan2(y0, x0 - e)};
+}
+function segmentGeo(p){ const R = (p.c*p.c/4 + p.h*p.h)/(2*p.h); return {R, a:Math.atan2(p.c/2, R - p.h)}; }
+/* Ogni forma: nome, parametri, come nasce da un riquadro trascinato, come si genera.
+   curved = ha lati curvi (area e perimetro calcolati con le formule esatte). */
+const SH = {
+  rect:{nm:'Rettangolo', plain:true},
+  square:{nm:'Quadrato', plain:true},
+  circle:{nm:'Cerchio', curved:true, ps:[Lp('d','Diametro')], box:(w,h) => ({d:Math.max(w,h)}),
+    gen:p => ({o:circlePts(0,0,p.d/2)}), area:p => Math.PI*p.d*p.d/4, perim:p => Math.PI*p.d, lab:p => 'Ø ' + fw(p.d)},
+  ellipse:{nm:'Ellisse', curved:true, ps:[Lp('a','Larghezza'), Lp('b','Altezza')], box:(w,h) => ({a:w, b:h}),
+    gen:p => { const o = arcPts(0,0,p.a/2,p.b/2,0,TAU,CN); o.pop(); return {o}; }, area:p => Math.PI*p.a*p.b/4,
+    perim:p => { const a = p.a/2, b = p.b/2, h = ((a-b)/(a+b))**2; return Math.PI*(a+b)*(1 + 3*h/(10 + Math.sqrt(4 - 3*h))); }, lab:p => fw(p.a) + ' × ' + fw(p.b)},
+  stadium:{nm:'Ovale (pista)', curved:true, ps:[Lp('L','Lunghezza totale'), Lp('W','Larghezza')], chk:p => p.L < p.W ? 'La lunghezza totale deve essere almeno uguale alla larghezza.' : null,
+    box:(w,h) => ({L:Math.max(w,h), W:Math.min(w,h)}),
+    gen:p => { const r = p.W/2, s = (p.L - p.W)/2; return {o:[...arcPts(s,0,r,r,-Math.PI/2,Math.PI/2,CN/2), ...arcPts(-s,0,r,r,Math.PI/2,Math.PI*1.5,CN/2)]}; },
+    area:p => (p.L-p.W)*p.W + Math.PI*p.W*p.W/4, perim:p => 2*(p.L-p.W) + Math.PI*p.W, lab:p => fw(p.L) + ' × ' + fw(p.W)},
+  semicircle:{nm:'Semicerchio', curved:true, ps:[Lp('d','Diametro')], box:(w,h) => ({d:Math.max(w, 2*h)}),
+    gen:p => ({o:arcPts(0,0,p.d/2,p.d/2,Math.PI,TAU,CN/2)}), area:p => Math.PI*p.d*p.d/8, perim:p => Math.PI*p.d/2 + p.d, lab:p => 'Ø ' + fw(p.d)},
+  quarter:{nm:'Quarto di cerchio', curved:true, ps:[Lp('r','Raggio')], box:(w,h) => ({r:Math.max(w,h)}),
+    gen:p => ({o:[{x:0,y:0}, ...arcPts(0,0,p.r,p.r,-Math.PI/2,0,CN/4)]}), area:p => Math.PI*p.r*p.r/4, perim:p => Math.PI*p.r/2 + 2*p.r, lab:p => 'R ' + fw(p.r)},
+  sector:{nm:'Settore (spicchio)', curved:true, ps:[Lp('r','Raggio'), {k:'a', n:'Angolo', t:'ang'}], chk:p => p.a > 360 ? "L'angolo deve essere al massimo 360°." : null,
+    box:(w,h) => ({r:Math.max(w,h), a:60}),
+    gen:p => { const a = p.a*Math.PI/180; return {o:[{x:0,y:0}, ...arcPts(0,0,p.r,p.r,-Math.PI/2-a/2,-Math.PI/2+a/2,Math.max(6, Math.round(CN*p.a/360)))]}; },
+    area:p => p.a*Math.PI/360*p.r*p.r, perim:p => p.r*p.a*Math.PI/180 + (p.a < 360 ? 2*p.r : 0), lab:p => 'R ' + fw(p.r) + ' · ' + nf(p.a,1) + '°'},
+  segment:{nm:'Segmento circolare', curved:true, ps:[Lp('c','Corda (base)'), Lp('h','Freccia (altezza)')], box:(w,h) => ({c:w, h:Math.min(h, w)}),
+    gen:p => { const g = segmentGeo(p); return {o:arcPts(0, g.R - p.h, g.R, g.R, -Math.PI/2 + g.a, -Math.PI/2 - g.a, CN)}; },
+    area:p => { const g = segmentGeo(p); return g.R*g.R*(2*g.a - Math.sin(2*g.a))/2; }, perim:p => { const g = segmentGeo(p); return g.R*2*g.a + p.c; }, lab:p => fw(p.c) + ' × ' + fw(p.h)},
+  crescent:{nm:'Semiluna', curved:true, ps:[Lp('D','Diametro esterno'), Lp('d','Diametro interno'), Lp('s','Spessore massimo')],
+    chk:p => !(p.s < p.D) ? 'Lo spessore deve essere minore del diametro esterno.' : (p.s <= p.D - p.d ? 'Lo spessore deve essere maggiore della differenza tra i due diametri, altrimenti il cerchio interno non “taglia” la luna.' : null),
+    box:(w,h) => { const D = Math.max(h, w*0.8); return {D, d:D*0.9, s:clamp(w*0.55, D*0.15, D*0.9)}; },
+    gen:p => { const g = crescentGeo(p); return {o:[...arcPts(0,0,g.R,g.R,g.t1,TAU-g.t1,CN), ...arcPts(g.e,0,g.r,g.r,TAU-g.f0,g.f0,CN).slice(1,-1)]}; },
+    area:p => { const g = crescentGeo(p); return Math.PI*g.R*g.R - lensArea(g.R, g.r, g.e); },
+    perim:p => { const g = crescentGeo(p); return g.R*(TAU - 2*g.t1) + g.r*(TAU - 2*g.f0); }, lab:p => 'Ø ' + fw(p.D) + ' · sp. ' + fw(p.s)},
+  ring:{nm:'Corona circolare', curved:true, ps:[Lp('D','Diametro esterno'), Lp('d','Diametro interno')], chk:p => p.d >= p.D ? 'Il diametro interno deve essere minore di quello esterno.' : null,
+    box:(w,h) => { const D = Math.max(w,h); return {D, d:D*0.6}; },
+    gen:p => ({o:circlePts(0,0,p.D/2), h:[circlePts(0,0,p.d/2).reverse()]}), area:p => Math.PI*(p.D*p.D - p.d*p.d)/4, perim:p => Math.PI*(p.D + p.d), lab:p => 'Ø ' + fw(p.D) + ' / ' + fw(p.d)},
+  halfring:{nm:'Mezza corona (arco)', curved:true, ps:[Lp('D','Diametro esterno'), Lp('d','Diametro interno')], chk:p => p.d >= p.D ? 'Il diametro interno deve essere minore di quello esterno.' : null,
+    box:(w,h) => { const D = Math.max(w, 2*h); return {D, d:D*0.6}; },
+    gen:p => ({o:[...arcPts(0,0,p.D/2,p.D/2,Math.PI,TAU,CN/2), ...arcPts(0,0,p.d/2,p.d/2,TAU,Math.PI,CN/2)]}),
+    area:p => Math.PI*(p.D*p.D - p.d*p.d)/8, perim:p => Math.PI*(p.D + p.d)/2 + (p.D - p.d), lab:p => 'Ø ' + fw(p.D) + ' / ' + fw(p.d)},
+  tri:{nm:'Triangolo (3 lati)', ps:[Lp('a','Base'), Lp('b','Lato sinistro'), Lp('c','Lato destro')],
+    chk:p => (p.a < p.b + p.c && p.b < p.a + p.c && p.c < p.a + p.b) ? null : 'Con queste misure il triangolo non si chiude: ogni lato deve essere minore della somma degli altri due.',
+    box:(w,h) => ({a:w, b:Math.hypot(0.35*w, h), c:Math.hypot(0.65*w, h)}),
+    gen:p => { const x = (p.a*p.a + p.b*p.b - p.c*p.c)/(2*p.a), y = Math.sqrt(Math.max(0, p.b*p.b - x*x)); return {o:[{x:0,y:0},{x:p.a,y:0},{x,y:-y}]}; }},
+  triEq:{nm:'Triangolo equilatero', ps:[Lp('l','Lato')], box:(w,h) => ({l:Math.max(w, h*2/Math.sqrt(3))}),
+    gen:p => ({o:P_([[-p.l/2,0],[p.l/2,0],[0,-p.l*Math.sqrt(3)/2]])})},
+  triIso:{nm:'Triangolo isoscele', ps:[Lp('b','Base'), Lp('h','Altezza')], box:(w,h) => ({b:w, h}),
+    gen:p => ({o:P_([[-p.b/2,0],[p.b/2,0],[0,-p.h]])})},
+  triRect:{nm:'Triangolo rettangolo', ps:[Lp('a','Cateto (base)'), Lp('b','Cateto (altezza)')], box:(w,h) => ({a:w, b:h}),
+    gen:p => ({o:P_([[0,0],[p.a,0],[0,-p.b]])})},
+  trap:{nm:'Trapezio isoscele', ps:[Lp('B','Base maggiore'), Lp('b','Base minore'), Lp('h','Altezza')], box:(w,h) => ({B:w, b:w*0.55, h}),
+    gen:p => ({o:P_([[-p.B/2,0],[p.B/2,0],[p.b/2,-p.h],[-p.b/2,-p.h]])})},
+  trapRect:{nm:'Trapezio rettangolo', ps:[Lp('B','Base maggiore'), Lp('b','Base minore'), Lp('h','Altezza')], box:(w,h) => ({B:w, b:w*0.55, h}),
+    gen:p => ({o:P_([[0,0],[p.B,0],[p.b,-p.h],[0,-p.h]])})},
+  para:{nm:'Parallelogramma', ps:[Lp('b','Base'), Lp('h','Altezza'), Lp('o','Spostamento lato')], box:(w,h) => ({b:w*0.75, h, o:w*0.25}),
+    gen:p => ({o:P_([[0,0],[p.b,0],[p.b+p.o,-p.h],[p.o,-p.h]])})},
+  rhombus:{nm:'Rombo', ps:[Lp('D','Diagonale orizzontale'), Lp('d','Diagonale verticale')], box:(w,h) => ({D:w, d:h}),
+    gen:p => ({o:P_([[-p.D/2,0],[0,-p.d/2],[p.D/2,0],[0,p.d/2]])})},
+  pent:{nm:'Pentagono', ps:[Lp('l','Lato')], box:(w,h) => ({l:Math.max(w,h)*Math.sin(Math.PI/5)}), gen:p => ({o:regPts(5, p.l/(2*Math.sin(Math.PI/5)))})},
+  hex:{nm:'Esagono', ps:[Lp('l','Lato')], box:(w,h) => ({l:Math.max(w,h)*Math.sin(Math.PI/6)}), gen:p => ({o:regPts(6, p.l/(2*Math.sin(Math.PI/6)))})},
+  oct:{nm:'Ottagono', ps:[Lp('l','Lato')], box:(w,h) => ({l:Math.max(w,h)*Math.sin(Math.PI/8)}), gen:p => ({o:regPts(8, p.l/(2*Math.sin(Math.PI/8)))})},
+  ngon:{nm:'Poligono regolare', ps:[{k:'n', n:'Numero di lati', t:'int'}, Lp('l','Lato')], chk:p => p.n < 3 || p.n > 200 ? 'Il numero di lati deve essere tra 3 e 200.' : null,
+    box:(w,h) => ({n:7, l:Math.max(w,h)*Math.sin(Math.PI/7)}), gen:p => ({o:regPts(p.n, p.l/(2*Math.sin(Math.PI/p.n)))})},
+  star:{nm:'Stella', ps:[{k:'n', n:'Numero di punte', t:'int'}, Lp('De','Diametro esterno'), Lp('Di','Diametro interno')],
+    chk:p => p.n < 3 || p.n > 100 ? 'Le punte devono essere tra 3 e 100.' : (p.Di >= p.De ? 'Il diametro interno deve essere minore di quello esterno.' : null),
+    box:(w,h) => { const De = Math.max(w,h); return {n:5, De, Di:De*0.45}; },
+    gen:p => { const o = []; for(let k=0;k<2*p.n;k++){ const a = -Math.PI/2 + Math.PI*k/p.n, r = (k % 2 ? p.Di : p.De)/2; o.push({x:r*Math.cos(a), y:r*Math.sin(a)}); } return {o}; }},
+  lshape:{nm:'Forma a L', ps:[Lp('w','Larghezza'), Lp('h','Altezza'), Lp('s','Spessore')], chk:p => (p.s < p.w && p.s < p.h) ? null : 'Lo spessore deve essere minore di larghezza e altezza.',
+    box:(w,h) => ({w, h, s:Math.min(w,h)*0.35}), gen:p => ({o:P_([[0,0],[p.w,0],[p.w,-p.s],[p.s,-p.s],[p.s,-p.h],[0,-p.h]])})},
+  tshape:{nm:'Forma a T', ps:[Lp('w','Larghezza'), Lp('h','Altezza'), Lp('s','Spessore')], chk:p => (p.s < p.w && p.s < p.h) ? null : 'Lo spessore deve essere minore di larghezza e altezza.',
+    box:(w,h) => ({w, h, s:Math.min(w,h)*0.3}), gen:p => ({o:P_([[-p.w/2,-p.h],[p.w/2,-p.h],[p.w/2,-p.h+p.s],[p.s/2,-p.h+p.s],[p.s/2,0],[-p.s/2,0],[-p.s/2,-p.h+p.s],[-p.w/2,-p.h+p.s]])})},
+  ushape:{nm:'Forma a U', ps:[Lp('w','Larghezza'), Lp('h','Altezza'), Lp('s','Spessore')], chk:p => (2*p.s < p.w && p.s < p.h) ? null : 'Lo spessore deve essere minore di metà larghezza e dell\'altezza.',
+    box:(w,h) => ({w, h, s:Math.min(w*0.3, h*0.5)}), gen:p => ({o:P_([[0,0],[p.w,0],[p.w,-p.h],[p.w-p.s,-p.h],[p.w-p.s,-p.s],[p.s,-p.s],[p.s,-p.h],[0,-p.h]])})},
+};
+const SH_ORDER = ['rect','square','circle','ellipse','stadium','semicircle','quarter','sector','segment','crescent','ring','halfring',
+  'tri','triEq','triIso','triRect','trap','trapRect','para','rhombus','pent','hex','oct','ngon','star','lshape','tshape','ushape'];
+const isCurved = s => !!(s.geo && SH[s.geo.t].curved);
+
+/* rigenera i punti di una forma parametrica dalla sua posizione/rotazione/misure */
+function regen(s){
+  const g = SH[s.geo.t].gen(s.geo.p);
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  g.o.forEach(q => { x0=Math.min(x0,q.x); y0=Math.min(y0,q.y); x1=Math.max(x1,q.x); y1=Math.max(y1,q.y); });
+  const mx = (x0+x1)/2, my = (y0+y1)/2, a = (s.geo.rot||0)*Math.PI/180, c = Math.cos(a), sn = Math.sin(a);
+  const tr = q => { const x = q.x - mx, y = q.y - my; return {x:s.geo.cx + x*c - y*sn, y:s.geo.cy + x*sn + y*c}; };
+  s.pts = g.o.map(tr); s.holes = (g.h || []).map(r => r.map(tr)); s.closed = true;
+}
+function moveShape(s, dx, dy){
+  if(s.geo){ s.geo.cx += dx; s.geo.cy += dy; regen(s); }
+  else s.pts.forEach(q => { q.x += dx; q.y += dy; });
+}
+function typeName(s){ if(s.geo) return SH[s.geo.t].nm; if(s.kind && SH[s.kind]) return SH[s.kind].nm; return s.closed ? 'Poligono (' + s.pts.length + ' lati)' : 'Linea'; }
+function shapeLabel(s, k){ return (k+1) + '. ' + (s.name || typeName(s)); }
+
+/* icona SVG di un tipo di forma (per il menu Forme) */
+function shapeIcon(t){
+  let rings;
+  if(t === 'rect') rings = [P_([[0,0],[100,0],[100,62],[0,62]])];
+  else if(t === 'square') rings = [P_([[0,0],[70,0],[70,70],[0,70]])];
+  else { const g = SH[t].gen(SH[t].box(100, 70)); rings = [g.o, ...(g.h||[])]; }
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  rings[0].forEach(q => { x0=Math.min(x0,q.x); y0=Math.min(y0,q.y); x1=Math.max(x1,q.x); y1=Math.max(y1,q.y); });
+  const w = x1-x0, h = y1-y0, pad = Math.max(w,h)*0.08;
+  return `<svg viewBox="${x0-pad} ${y0-pad} ${w+2*pad} ${h+2*pad}" preserveAspectRatio="xMidYMid meet"><path d="${ringsPath(rings, true)}" fill="rgba(31,111,235,.14)" fill-rule="evenodd" stroke="#243042" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+function openShapePicker(){
+  openModal(`<h3>Forme</h3><p>Scegli una forma, poi trascina sul foglio per disegnarla (o tocca per inserirla). Toccala per scrivere le misure.</p>
+    <div class="pick-grid">${SH_ORDER.map(t => `<button class="pick ${t===opts.shape && tool==='shape'?'on':''}" data-t="${t}">${shapeIcon(t)}${esc(SH[t].nm)}</button>`).join('')}</div>
+    <div class="mrow"><button class="btn ghost" id="pkClose">Chiudi</button></div>`, null, true);
+  $('#pkClose').onclick = closeModal;
+  $('#modalBox').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+    opts.shape = b.dataset.t; saveOpts(); closeModal(); setTool('shape');
+    toast(SH[opts.shape].nm + ': trascina per disegnarla');
+  });
+}
+
 /* =================== EDITOR =================== */
 const cv = $('#cv'), ctx = cv.getContext('2d');
 let D = null;                    // disegno corrente
 let view = {x:0, y:0, z:1};      // schermo = mondo*z + (x,y)
+const ZMIN = 1e-12, ZMAX = 1e12; // zoom praticamente illimitato
+let mode = '2d';
 let tool = 'line';
 let draft = [], rubber = null;   // forma in costruzione (strumento Linee)
-let selShape = null;
+let selShape = null, selSolid = null;
 let history = [];
 let act = null;                  // azione del puntatore in corso
-let resultKind = null;           // 'area' | 'perim' | null
+let resultKind = null;           // 'area' | 'perim' | 'vol' | null
 let showArea = false;
-let dpr = 1, lastPT = 'mouse';
+let dpr = 1, lastPT = 'mouse', lastSize = null;
 
 function openEditor(id){
   D = db.drawings.find(d => d.id === id);
-  D.shapes.forEach(s => { if(!s.measures) s.measures = {}; });
-  history = []; draft = []; rubber = null; selShape = null; act = null; resultKind = null; showArea = false;
+  if(!D.solids) D.solids = [];
+  D.shapes.forEach(s => { if(!s.measures) s.measures = {}; if(s.geo) regen(s); });
+  history = []; draft = []; rubber = null; selShape = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
+  cam = {yaw:-0.62, pitch:0.55, k:1, px:0, py:0}; viewIdx = 0;
   $('#home').classList.add('hidden'); $('#editor').classList.remove('hidden');
   $('#unitSel').value = D.unit;
   updateTitle();
-  setTool(D.shapes.length ? 'select' : 'line');
-  syncToggles(); renderResult();
-  resize(); fitView();
+  tool = D.shapes.length ? 'select' : 'line';
+  lastSize = null; resize();
+  setMode(D.mode === '3d' ? '3d' : '2d', true);
+  setTool(tool);
+  syncToggles(); fitView(); fit3D();
 }
 function closeEditor(){
   draft = []; rubber = null; act = null;
@@ -429,25 +743,47 @@ function closeEditor(){
 }
 function updateTitle(){ $('#title').innerHTML = esc(D.name) + `<small>${esc(folderPath(D.folderId).map(f=>f.name).join(' › '))} · tocca per rinominare</small>`; }
 function save(){ if(!D) return; D.updated = Date.now(); persist(); }
-function pushHistory(){ history.push(JSON.stringify({shapes:D.shapes, scale:D.scale})); if(history.length > 80) history.shift(); }
+function pushHistory(){ history.push(JSON.stringify({shapes:D.shapes, scale:D.scale, solids:D.solids})); if(history.length > 80) history.shift(); }
 function undo(){
   if(draft.length){ draft.pop(); if(!draft.length) rubber = null; refresh(); return; }
   const h = history.pop(); if(!h) return toast('Niente da annullare');
-  const o = JSON.parse(h); D.shapes = o.shapes; D.scale = o.scale;
+  const o = JSON.parse(h); D.shapes = o.shapes; D.scale = o.scale; D.solids = o.solids || [];
   if(!D.shapes.find(s => s.id === selShape)) selShape = null;
+  if(!D.solids.find(s => s.id === selSolid)) selSolid = null;
   save(); refresh();
 }
+function hasMeasures(){ return D.shapes.some(s => Object.keys(s.measures).length || (s.geo && s.geo.measured)); }
+function setUnit(u){ D.unit = opts.unit = u; $('#unitSel').value = u; saveOpts(); }
 
 $('#btnBack').onclick = closeEditor;
 $('#title').onclick = async () => { const v = await askText('Nome del disegno', D.name, 'Salva'); if(v){ D.name = v; save(); updateTitle(); } };
-$('#unitSel').onchange = e => { D.unit = opts.unit = e.target.value; saveOpts(); save(); refresh(); };
+// cambiare unità cambia solo i numeri mostrati: il disegno e la vista restano identici
+$('#unitSel').onchange = e => { setUnit(e.target.value); save(); refresh(); };
+$('#btnPdf').onclick = () => openComputo();
+document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+function setMode(m, silent){
+  if(m === '3d' && draft.length) finishDraft(false);
+  mode = m; if(D){ D.mode = m; }
+  document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('#tools2d').classList.toggle('hidden', m !== '2d');
+  $('#tools3d').classList.toggle('hidden', m !== '3d');
+  if(resultKind && (resultKind === 'vol') !== (m === '3d')) resultKind = null;
+  showArea = resultKind === 'area';
+  act = null; act3 = null;
+  resize();
+  if(m === '3d' && !silent){ fit3D(); if(!D.solids.length) toast('Premi “Aggiungi solido” o “Estrudi forma” per creare un oggetto 3D'); }
+  if(!silent) save();
+  refresh();
+}
 
 /* ---- strumenti ---- */
 document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+$('#tShape').onclick = openShapePicker;
 function setTool(t){
   if(t !== 'line' && draft.length) finishDraft(false);
   tool = t;
   document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+  $('#tShape').classList.toggle('on', t === 'shape');
   refresh();
 }
 function syncToggles(){ $('#tOrtho').classList.toggle('on', opts.ortho); $('#tGrid').classList.toggle('on', opts.grid); }
@@ -457,20 +793,22 @@ $('#tUndo').onclick = undo;
 $('#tDel').onclick = deleteSelected;
 $('#tArea').onclick  = () => { resultKind = resultKind === 'area' ? null : 'area'; showArea = resultKind === 'area'; renderResult(); draw(); };
 $('#tPerim').onclick = () => { resultKind = resultKind === 'perim' ? null : 'perim'; showArea = false; renderResult(); draw(); };
-$('#zIn').onclick  = () => zoomAt({x:cv.clientWidth/2, y:cv.clientHeight/2}, 1.35);
-$('#zOut').onclick = () => zoomAt({x:cv.clientWidth/2, y:cv.clientHeight/2}, 1/1.35);
-$('#zFit').onclick = () => { fitView(); };
+const center = () => ({x:cv.clientWidth/2, y:cv.clientHeight/2});
+$('#zIn').onclick  = () => zoomAt(center(), 1.35);
+$('#zOut').onclick = () => zoomAt(center(), 1/1.35);
+$('#zFit').onclick = () => { if(mode === '3d') fit3D(); else fitView(); };
 $('#dUndo').onclick = () => { draft.pop(); if(!draft.length) rubber = null; refresh(); };
 $('#dEnd').onclick = () => finishDraft(false);
 $('#dClose').onclick = () => finishDraft(true);
 $('#dCancel').onclick = () => { draft = []; rubber = null; refresh(); };
 
 async function deleteSelected(){
+  if(mode === '3d') return deleteSolid();
   if(draft.length){ draft = []; rubber = null; return refresh(); }
   if(!selShape) return toast('Seleziona prima una forma (strumento Seleziona)');
   pushHistory();
   D.shapes = D.shapes.filter(s => s.id !== selShape); selShape = null;
-  if(!D.shapes.some(s => Object.keys(s.measures).length)) D.scale = null;
+  if(!hasMeasures()) D.scale = null;
   save(); refresh(); toast('Forma eliminata · premi Annulla per recuperarla');
 }
 
@@ -490,6 +828,22 @@ function commitShape(pts, closed){
   D.shapes.push(s); selShape = s.id; save();
   toast('Forma creata ✓ Tocca un lato per inserire la misura');
 }
+/* forma dallo strumento Forme: riquadro da A a B (coordinate mondo) */
+function buildFromBox(A, B){
+  const t = opts.shape;
+  let dx = B.x - A.x, dy = B.y - A.y;
+  if(t === 'square'){ const s = Math.max(Math.abs(dx), Math.abs(dy)); dx = (dx < 0 ? -1 : 1)*s; dy = (dy < 0 ? -1 : 1)*s; }
+  const x0 = Math.min(A.x, A.x+dx), x1 = Math.max(A.x, A.x+dx), y0 = Math.min(A.y, A.y+dy), y1 = Math.max(A.y, A.y+dy);
+  if(SH[t].plain) return {id:uid(), kind:t, pts:[{x:x0,y:y0},{x:x1,y:y0},{x:x1,y:y1},{x:x0,y:y1}], closed:true, measures:{}};
+  let w = x1 - x0, h = y1 - y0;
+  if(w < h*0.08) w = h; if(h < w*0.08) h = w;
+  const s = {id:uid(), geo:{t, p:SH[t].box(w, h), cx:(x0+x1)/2, cy:(y0+y1)/2, rot:0}, closed:true, measures:{}};
+  regen(s); return s;
+}
+function addShape(s){
+  pushHistory(); D.shapes.push(s); selShape = s.id; save();
+  toast(s.geo ? 'Forma creata ✓ Toccala per scrivere le misure' : 'Forma creata ✓ Tocca un lato per inserire la misura');
+}
 
 /* ---- geometria ---- */
 const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
@@ -503,7 +857,7 @@ function segDist(p, a, b){
 function polyArea(pts){ let s = 0; for(let i=0;i<pts.length;i++){ const a = pts[i], b = pts[(i+1)%pts.length]; s += a.x*b.y - b.x*a.y; } return s/2; }
 function centroid(pts){
   const A = polyArea(pts);
-  if(Math.abs(A) < 1e-9){ return {x: pts.reduce((s,p)=>s+p.x,0)/pts.length, y: pts.reduce((s,p)=>s+p.y,0)/pts.length}; }
+  if(Math.abs(A) < 1e-30){ return {x: pts.reduce((s,p)=>s+p.x,0)/pts.length, y: pts.reduce((s,p)=>s+p.y,0)/pts.length}; }
   let cx = 0, cy = 0;
   for(let i=0;i<pts.length;i++){ const a = pts[i], b = pts[(i+1)%pts.length], f = a.x*b.y - b.x*a.y; cx += (a.x+b.x)*f; cy += (a.y+b.y)*f; }
   return {x: cx/(6*A), y: cy/(6*A)};
@@ -525,12 +879,29 @@ function rdp(pts, eps){
 }
 function segCount(s){ return s.closed ? s.pts.length : s.pts.length - 1; }
 function segLenCm(s, i){ return D.scale ? dist(s.pts[i], s.pts[(i+1)%s.pts.length]) * D.scale : null; }
-function shapeAreaCm2(s){ return D.scale && s.closed ? Math.abs(polyArea(s.pts)) * D.scale * D.scale : null; }
-function shapePerimCm(s){ if(!D.scale) return null; let t = 0; for(let i=0;i<segCount(s);i++) t += segLenCm(s,i); return t; }
-function gridStep(){
-  const base = 22 / view.z, p = Math.pow(10, Math.floor(Math.log10(base)));
-  for(const m of [1,2,5,10]) if(p*m >= base) return p*m;
-  return p*10;
+function shapeAreaCm2(s){
+  if(!D.scale || !s.closed) return null;
+  const T = s.geo && SH[s.geo.t];
+  const a = T && T.area ? T.area(s.geo.p) : Math.abs(polyArea(s.pts)) - (s.holes||[]).reduce((t,h) => t + Math.abs(polyArea(h)), 0);
+  return a * D.scale * D.scale;
+}
+function shapePerimCm(s){
+  if(!D.scale) return null;
+  const T = s.geo && SH[s.geo.t];
+  if(T && T.perim) return T.perim(s.geo.p) * D.scale;
+  let t = 0; for(let i=0;i<segCount(s);i++) t += segLenCm(s,i); return t;
+}
+function niceStep(base){ const p = Math.pow(10, Math.floor(Math.log10(base))); for(const m of [1,2,5,10]) if(p*m >= base) return p*m; return p*10; }
+function gridStep(){ return niceStep(22 / view.z); }
+function dimsText(s){
+  if(!D.scale) return 'senza misure';
+  if(s.geo){
+    const T = SH[s.geo.t], p = s.geo.p;
+    return T.ps.map(q => q.n.replace(/ \(.*\)/, '') + ' ' + (q.t === 'len' ? fmtLen(p[q.k]*D.scale, 'm') : q.t === 'ang' ? nf(p[q.k],1) + '°' : p[q.k])).join(', ');
+  }
+  const L = []; for(let i=0;i<segCount(s);i++) L.push(nf(segLenCm(s,i)/100, 2, 2));
+  if((s.kind === 'rect' || s.kind === 'square') && L.length === 4 && L[0] === L[2] && L[1] === L[3]) return L[0] + ' × ' + L[1] + ' m';
+  return (L.length <= 6 ? 'lati ' + L.join(' + ') : L.length + ' lati') + ' m';
 }
 
 /* ---- aggancio (snap) ---- */
@@ -553,7 +924,7 @@ function snapPoint(w, from, exclude){
   let lock = null;
   if(opts.ortho && from){
     const dx = p.x-from.x, dy = p.y-from.y;
-    if(Math.hypot(dx,dy) > 1e-9){
+    if(Math.hypot(dx,dy) > 0){
       const ang = Math.atan2(dy, dx), k = Math.round(ang/(Math.PI/4)), target = k*Math.PI/4;
       if(Math.abs(ang - target) < 0.13){
         const m = ((k % 4) + 4) % 4;
@@ -565,7 +936,7 @@ function snapPoint(w, from, exclude){
   }
   // 4) allineamento con altri vertici (per chiudere bene le forme)
   if(!opts.grid && lock !== 'd'){
-    const all = []; D.shapes.forEach(s => s.pts.forEach((q,i) => { if(!(exclude && exclude.sid===s.id && exclude.idx===i)) all.push(q); })); draft.forEach(q => all.push(q));
+    const all = []; D.shapes.forEach(s => { if(isCurved(s)) return; s.pts.forEach((q,i) => { if(!(exclude && exclude.sid===s.id && exclude.idx===i)) all.push(q); }); }); draft.forEach(q => all.push(q));
     let gx = null, gy = null, bx = tol*0.7, by = tol*0.7;
     all.forEach(q => {
       if(q === from) return;
@@ -581,7 +952,7 @@ function snapPoint(w, from, exclude){
 /* ---- hit test ---- */
 function hitVertex(sp){
   const tol = tolPx(); let best = null, bd = tol;
-  const order = D.shapes.slice().sort((a,b) => (a.id===selShape) - (b.id===selShape)).reverse();
+  const order = D.shapes.filter(s => !s.geo).sort((a,b) => (a.id===selShape) - (b.id===selShape)).reverse();
   for(const s of order) s.pts.forEach((p,i) => { const d = dist(ws(p), sp); if(d < bd){ bd = d; best = {shape:s, idx:i}; } });
   return best;
 }
@@ -597,37 +968,41 @@ function hitSegment(sp){
 }
 function hitShape(sp){
   const w = toW(sp);
-  for(let k=D.shapes.length-1;k>=0;k--){ const s = D.shapes[k]; if(s.closed && inPoly(w, s.pts)) return s; }
+  for(let k=D.shapes.length-1;k>=0;k--){ const s = D.shapes[k]; if(s.closed && inPoly(w, s.pts) && !(s.holes||[]).some(h => inPoly(w, h))) return s; }
   return null;
 }
+function openShapeOrSide(shape, i){ if(shape.geo) openShapeDims(shape); else openMeasure(shape, i); }
 
 /* ---- MISURA di un lato ---- */
 function openMeasure(shape, i){
   selShape = shape.id; draw();
-  const cur = segLenCm(shape, i), m = shape.measures[i], u = D.unit;
+  const cur = segLenCm(shape, i), m = shape.measures[i];
+  let u = D.unit;
   const val = m != null ? fromCm(m,u) : (cur != null ? fromCm(cur,u) : '');
-  const valStr = val === '' ? '' : nf(val, UNIT_DEC[u] + 1).replace(/\./g,'');
+  const valStr = val === '' ? '' : numStr(val);
   const desc = D.scale
     ? `Lunghezza attuale ≈ ${fmtLen(cur)}. Inserisci la misura reale: il disegno si adatterà.`
     : `Prima misura del disegno: serve a fissare la scala. Gli altri lati verranno calcolati in proporzione.`;
   openModal(`<h3>Misura del lato</h3><p>${desc}</p>
     <div class="in-row"><input id="mVal" class="inp" inputmode="decimal" autocomplete="off" placeholder="es. 3,50" value="${valStr}">
-    <select id="mUnit">${['mm','cm','m'].map(x => `<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></div>
+    <select id="mUnit">${UNITS.map(x => `<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></div>
     <div class="mrow left">${m != null ? `<button class="btn danger" id="mDel">Rimuovi misura</button>` : '<span></span>'}
       <span style="display:flex;gap:8px"><button class="btn ghost" id="mCancel">Annulla</button><button class="btn primary" id="mOk">Salva</button></span></div>`);
   const inp = $('#mVal'); setTimeout(() => { inp.focus(); inp.select(); }, 60);
+  // cambiando unità il numero viene convertito (350 cm → 3,5 m), così la forma non cambia
+  $('#mUnit').onchange = e => { const v = parseNum(inp.value); if(isFinite(v)) inp.value = numStr(fromCm(toCm(v, u), e.target.value)); u = e.target.value; };
   $('#mCancel').onclick = closeModal;
   $('#mOk').onclick = () => {
     const v = parseNum(inp.value);
     if(!(v > 0)){ inp.style.borderColor = 'var(--danger)'; inp.focus(); return; }
     const unit = $('#mUnit').value;
-    if(unit !== D.unit){ D.unit = unit; $('#unitSel').value = unit; }
+    if(unit !== D.unit) setUnit(unit);
     closeModal(); pushHistory(); applyMeasure(shape, i, toCm(v, unit)); save(); refresh();
   };
   inp.onkeydown = e => { if(e.key === 'Enter') $('#mOk').click(); if(e.key === 'Escape') closeModal(); };
   if(m != null) $('#mDel').onclick = () => {
     closeModal(); pushHistory(); delete shape.measures[i];
-    if(!D.shapes.some(s => Object.keys(s.measures).length)) D.scale = null;
+    if(!hasMeasures()) D.scale = null;
     save(); refresh();
   };
 }
@@ -636,7 +1011,7 @@ function openMeasure(shape, i){
    così rettangoli e forme ad angolo retto restano squadrati. */
 function applyMeasure(shape, i, cm){
   const n = shape.pts.length, A = shape.pts[i], bi = (i+1) % n, B = shape.pts[bi];
-  const cur = dist(A, B); if(cur < 1e-9) return;
+  const cur = dist(A, B); if(!(cur > 0)) return;
   if(!D.scale){ D.scale = cm / cur; shape.measures[i] = cm; return; }
   const L = cm / D.scale, delta = L - cur, ux = (B.x-A.x)/cur, uy = (B.y-A.y)/cur, eps = cur*0.02;
   shape.pts.forEach((P, j) => {
@@ -646,14 +1021,47 @@ function applyMeasure(shape, i, cm){
   });
   shape.measures[i] = cm;
 }
+/* ---- MISURE di una forma parametrica (cerchio, triangolo, ...) ---- */
+function openShapeDims(s){
+  selShape = s.id; draw();
+  const T = SH[s.geo.t], p = s.geo.p;
+  paramForm({
+    title: 'Misure: ' + T.nm,
+    desc: D.scale ? 'Scrivi le misure reali: la forma si adatta.' : 'Prima misura del disegno: fissa la scala. Puoi scriverne anche una sola, le altre restano in proporzione.',
+    fields: T.ps.map(q => ({k:q.k, n:q.n, t:q.t, v: q.t === 'len' ? (D.scale ? p[q.k]*D.scale : null) : p[q.k]})),
+    rot: s.geo.rot || 0,
+    name: {v:s.name, ph:T.nm},
+    delLabel: 'Elimina forma', onDel: () => { selShape = s.id; deleteSelected(); },
+    onSave: (vals, ex) => {
+      const np = {...p}; let sc = D.scale;
+      const lens = T.ps.filter(q => q.t === 'len');
+      if(!sc){ const first = lens.find(q => vals[q.k] != null); if(first) sc = vals[first.k] / p[first.k]; }
+      let anyLen = false;
+      T.ps.forEach(q => {
+        if(vals[q.k] == null) return;
+        if(q.t === 'len'){ if(sc){ np[q.k] = vals[q.k] / sc; anyLen = true; } }
+        else np[q.k] = vals[q.k];
+      });
+      const err = T.chk && T.chk(np); if(err) return err;
+      pushHistory();
+      D.scale = sc; s.geo.p = np; s.geo.rot = ex.rot || 0; s.name = ex.name || '';
+      if(anyLen) s.geo.measured = true;
+      if(ex.unit !== D.unit) setUnit(ex.unit);
+      regen(s); save(); refresh();
+      return null;
+    }
+  });
+}
 
-/* ---- risultati Area / Perimetro ---- */
+/* ---- risultati Area / Perimetro / Volume ---- */
 function renderResult(){
   const el = $('#result');
   $('#tArea').classList.toggle('on', resultKind === 'area');
   $('#tPerim').classList.toggle('on', resultKind === 'perim');
+  $('#s3Vol').classList.toggle('on', resultKind === 'vol');
   if(!resultKind || !D){ el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
+  if(resultKind === 'vol') return renderVolumes(el);
   const title = resultKind === 'area' ? 'Area' : 'Perimetro';
   let body = '';
   if(!D.shapes.length) body = `<div class="note">Disegna prima una forma.</div>`;
@@ -661,25 +1069,28 @@ function renderResult(){
   else {
     let tot = 0, cnt = 0;
     D.shapes.forEach((s, k) => {
-      const sel = s.id === selShape ? ' sel' : '';
+      const sel = s.id === selShape ? ' sel' : '', lab = esc(shapeLabel(s, k));
       if(resultKind === 'area'){
-        if(!s.closed){ body += `<div class="row${sel}"><span>Forma ${k+1}</span><span class="v"><span class="sub">forma aperta – chiudila per l'area</span></span></div>`; return; }
+        if(!s.closed){ body += `<div class="row${sel}"><span>${lab}</span><span class="v"><span class="sub">forma aperta – chiudila per l'area</span></span></div>`; return; }
         const a = shapeAreaCm2(s); tot += a; cnt++;
         const alt = D.unit === 'm' ? fmtArea(a,'cm') : fmtArea(a,'m');
-        body += `<div class="row${sel}"><span>Forma ${k+1}</span><span class="v">${fmtArea(a)}<span class="sub">${alt}</span></span></div>`;
+        body += `<div class="row${sel}"><span>${lab}</span><span class="v">${fmtArea(a)}<span class="sub">${alt}</span></span></div>`;
       } else {
         const p = shapePerimCm(s); tot += p; cnt++;
-        const sides = []; for(let i=0;i<segCount(s);i++) sides.push(nf(fromCm(segLenCm(s,i), D.unit), UNIT_DEC[D.unit], D.unit==='m'?2:0));
-        const exp = sides.length <= 8 ? sides.join(' + ') : sides.length + ' lati';
-        body += `<div class="row${sel}"><span>Forma ${k+1}${s.closed?'':' <span class="sub">(aperta)</span>'}</span><span class="v">${fmtLen(p)}<span class="sub">${exp}</span></span></div>`;
+        let exp;
+        if(isCurved(s)) exp = esc(SH[s.geo.t].lab(s.geo.p));
+        else { const sides = []; for(let i=0;i<segCount(s);i++) sides.push(nf(fromCm(segLenCm(s,i), D.unit), UNIT_DEC[D.unit], D.unit==='m'?2:0)); exp = sides.length <= 8 ? sides.join(' + ') : sides.length + ' lati'; }
+        body += `<div class="row${sel}"><span>${lab}${s.closed?'':' <span class="sub">(aperta)</span>'}</span><span class="v">${fmtLen(p)}<span class="sub">${exp}</span></span></div>`;
       }
     });
     if(cnt > 1) body += `<div class="row tot"><span><b>Totale</b></span><span class="v">${resultKind === 'area' ? fmtArea(tot) : fmtLen(tot)}</span></div>`;
-    const unmeasured = D.shapes.reduce((n,s) => n + segCount(s) - Object.keys(s.measures).length, 0);
-    if(unmeasured) body += `<div class="note" style="margin-top:8px">ℹ️ I lati senza misura (≈) sono calcolati in proporzione dal disegno.</div>`;
+    const unmeasured = D.shapes.reduce((n,s) => n + (s.geo ? (s.geo.measured ? 0 : 1) : segCount(s) - Object.keys(s.measures).length), 0);
+    if(unmeasured) body += `<div class="note" style="margin-top:8px">ℹ️ Le misure con ≈ sono calcolate in proporzione dal disegno.</div>`;
+    body += `<div class="mrow"><button class="btn sm primary" id="rPdf">📄 Computo metrico PDF</button></div>`;
   }
   el.innerHTML = `<h4>${title}<button id="rClose" aria-label="Chiudi">✕</button></h4>${body}`;
   $('#rClose').onclick = () => { resultKind = null; showArea = false; renderResult(); draw(); };
+  const rp = $('#rPdf'); if(rp) rp.onclick = openComputo;
 }
 
 /* ---- toast / suggerimenti ---- */
@@ -688,16 +1099,17 @@ function toast(m){ toastMsg = m; clearTimeout(toastT); updateHint(); toastT = se
 function updateHint(){
   let h = toastMsg;
   if(!h){
-    if(tool === 'line') h = draft.length ? (draft.length >= 3 ? 'Tocca il 1° punto per chiudere · tocca l’ultimo per terminare' : 'Tocca o trascina per aggiungere il prossimo punto')
+    if(mode === '3d') h = D && D.solids.length ? 'Trascina per ruotare · 2 dita o rotella: zoom · tocca un solido, ritoccalo per le misure' : 'Aggiungi un solido o estrudi una forma del disegno 2D';
+    else if(tool === 'line') h = draft.length ? (draft.length >= 3 ? 'Tocca il 1° punto per chiudere · tocca l’ultimo per terminare' : 'Tocca o trascina per aggiungere il prossimo punto')
                                         : 'Tocca per mettere i punti o trascina per tracciare una linea · tocca un lato per la misura';
-    else if(tool === 'rect') h = 'Trascina per disegnare un rettangolo · tocca un lato per la misura';
+    else if(tool === 'shape') h = SH[opts.shape].nm + ': trascina per disegnarla · tocca “Forme” per cambiarla';
     else if(tool === 'free') h = 'Disegna col dito: diventa una forma con lati misurabili';
-    else h = 'Tocca un lato per la misura · trascina i punti o la forma · 2 dita: zoom';
+    else h = 'Tocca un lato o una forma per le misure · trascina per spostare · 2 dita: zoom';
   }
   $('#hint').textContent = h;
 }
 function refresh(){
-  $('#draftBar').classList.toggle('hidden', !(tool === 'line' && draft.length));
+  $('#draftBar').classList.toggle('hidden', !(mode === '2d' && tool === 'line' && draft.length));
   $('#dClose').classList.toggle('hidden', draft.length < 3);
   $('#dEnd').classList.toggle('hidden', draft.length < 2);
   updateHint(); renderResult(); draw();
@@ -706,7 +1118,11 @@ function refresh(){
 /* ---- vista ---- */
 function resize(){
   dpr = window.devicePixelRatio || 1;
-  cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(cv.clientHeight * dpr);
+  const W = cv.clientWidth, H = cv.clientHeight;
+  // se lo schermo cambia dimensione (tastiera, rotazione) il disegno resta al centro, con la stessa scala
+  if(lastSize && W && H){ view.x += (W - lastSize.W)/2; view.y += (H - lastSize.H)/2; }
+  if(W && H) lastSize = {W, H};
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
   draw();
 }
 window.addEventListener('resize', () => { if(D) resize(); });
@@ -716,42 +1132,48 @@ function fitView(){
   if(!pts.length){ view = {x:W/2, y:H/2, z:1}; return draw(); }
   let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
   pts.forEach(p => { x0=Math.min(x0,p.x); y0=Math.min(y0,p.y); x1=Math.max(x1,p.x); y1=Math.max(y1,p.y); });
-  const bw = Math.max(x1-x0, 1), bh = Math.max(y1-y0, 1);
-  const z = Math.max(0.01, Math.min(100, Math.min((W-110)/bw, (H-150)/bh)));
+  const bw = Math.max(x1-x0, 1e-9), bh = Math.max(y1-y0, 1e-9);
+  const z = clamp(Math.min((W-110)/bw, (H-150)/bh), ZMIN, ZMAX);
   view = {z, x: W/2 - (x0+bw/2)*z, y: H/2 - (y0+bh/2)*z + 10};
   draw();
 }
 function zoomAt(p, f){
-  const w = toW(p), z = Math.max(0.01, Math.min(200, view.z * f));
+  if(mode === '3d') return zoom3D(p, f);
+  const w = toW(p), z = clamp(view.z * f, ZMIN, ZMAX);
   view = {z, x: p.x - w.x*z, y: p.y - w.y*z}; draw();
 }
 
 /* ---- disegno su canvas ---- */
-function rr(x, y, w, h, r){ ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(x,y,w,h,r); else ctx.rect(x,y,w,h); }
-function pill(text, x, y, angle, color, bg, bold){
-  ctx.save(); ctx.translate(x, y); ctx.rotate(angle || 0);
-  ctx.font = `${bold ? '700' : '600'} 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif`;
-  const w = ctx.measureText(text).width + 12;
-  rr(-w/2, -10, w, 20, 6); ctx.fillStyle = bg || 'rgba(255,255,255,.93)'; ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 1; ctx.stroke();
-  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 0, 0.5);
-  ctx.restore();
+function rr(c, x, y, w, h, r){ c.beginPath(); if(c.roundRect) c.roundRect(x,y,w,h,r); else c.rect(x,y,w,h); }
+function pill(text, x, y, angle, color, bg, bold, c){
+  c = c || ctx;
+  c.save(); c.translate(x, y); c.rotate(angle || 0);
+  c.font = `${bold ? '700' : '600'} 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif`;
+  const w = c.measureText(text).width + 12;
+  rr(c, -w/2, -10, w, 20, 6); c.fillStyle = bg || 'rgba(255,255,255,.93)'; c.fill();
+  c.strokeStyle = 'rgba(0,0,0,.08)'; c.lineWidth = 1; c.stroke();
+  c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, 0, 0.5);
+  c.restore();
 }
 function draw(){
   if(!D) return;
+  if(mode === '3d') return draw3D();
   const W = cv.clientWidth, H = cv.clientHeight;
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.fillStyle = '#fbfcfe'; ctx.fillRect(0,0,W,H);
   drawGrid(W, H);
   D.shapes.forEach(drawShape);
   drawDraft();
-  if(act && act.type === 'rect' && act.moved){
-    const a = ws(act.a), b = ws(act.b);
+  if(act && act.type === 'shape' && act.moved){
+    const pv = buildFromBox(act.a, act.b);
     ctx.setLineDash([6,4]); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(31,111,235,.08)';
-    ctx.beginPath(); ctx.rect(a.x, a.y, b.x-a.x, b.y-a.y); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+    pathShape(pv); ctx.fill('evenodd'); ctx.stroke(); ctx.setLineDash([]);
     if(D.scale){
-      pill(fmtLen(Math.abs(act.b.x-act.a.x)*D.scale), (a.x+b.x)/2, Math.min(a.y,b.y) - 14, 0, '#1f6feb');
-      pill(fmtLen(Math.abs(act.b.y-act.a.y)*D.scale), Math.max(a.x,b.x) + 8, (a.y+b.y)/2, -Math.PI/2, '#1f6feb');
+      if(pv.kind){
+        const a = ws(pv.pts[0]), b = ws(pv.pts[2]);
+        pill(fmtLen((pv.pts[1].x - pv.pts[0].x)*D.scale), (a.x+b.x)/2, a.y - 14, 0, '#1f6feb');
+        pill(fmtLen((pv.pts[2].y - pv.pts[1].y)*D.scale), b.x + 8, (a.y+b.y)/2, -Math.PI/2, '#1f6feb');
+      } else if(isCurved(pv)){ const c = ws(centroid(pv.pts)); pill(SH[pv.geo.t].lab(pv.geo.p), c.x, c.y, 0, '#1f6feb'); }
     }
   }
   if(act && act.type === 'free' && act.pts.length > 1){
@@ -778,23 +1200,33 @@ function drawGrid(W, H){
     ctx.strokeStyle = i % 5 === 0 ? '#dfe4ec' : '#eef1f6'; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
   }
 }
+function pathShape(s){
+  ctx.beginPath();
+  [s.pts, ...(s.holes||[])].forEach(r => { r.forEach((q,i) => { const p = ws(q); i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y); }); if(s.closed) ctx.closePath(); });
+}
 function drawShape(s){
-  const sel = s.id === selShape, P = s.pts.map(ws);
-  ctx.beginPath(); P.forEach((p,i) => i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y)); if(s.closed) ctx.closePath();
-  if(s.closed){ ctx.fillStyle = sel ? 'rgba(31,111,235,.13)' : 'rgba(31,111,235,.06)'; ctx.fill(); }
+  const sel = s.id === selShape;
+  pathShape(s);
+  if(s.closed){ ctx.fillStyle = sel ? 'rgba(31,111,235,.13)' : 'rgba(31,111,235,.06)'; ctx.fill('evenodd'); }
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   ctx.lineWidth = sel ? 3 : 2; ctx.strokeStyle = sel ? '#1f6feb' : '#243042'; ctx.stroke();
-  P.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, sel ? 5.5 : 3.5, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = sel ? '#1f6feb' : '#243042'; ctx.stroke(); });
+  if(s.geo) return;
+  s.pts.map(ws).forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, sel ? 5.5 : 3.5, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = sel ? '#1f6feb' : '#243042'; ctx.stroke(); });
 }
 function drawLabels(s){
   const n = s.pts.length, sel = s.id === selShape;
   const C = ws(s.closed ? centroid(s.pts) : {x: s.pts.reduce((a,p)=>a+p.x,0)/n, y: s.pts.reduce((a,p)=>a+p.y,0)/n});
+  if(s.geo){
+    if(!D.scale){ if(sel) pill('tocca per le misure', C.x, C.y + (showArea ? 24 : 0), 0, '#6b7686'); return; }
+    if(isCurved(s)){ pill((s.geo.measured ? '' : '≈ ') + SH[s.geo.t].lab(s.geo.p), C.x, C.y + (showArea ? 24 : 0), 0, s.geo.measured ? '#1b2330' : '#6b7686', null, !!s.geo.measured); return; }
+  }
   for(let i=0;i<segCount(s);i++){
     const A = ws(s.pts[i]), B = ws(s.pts[(i+1)%n]), sl = dist(A,B);
     if(sl < 28) continue;
-    const m = s.measures[i], cm = segLenCm(s, i);
-    let text, color;
+    const m = s.geo ? null : s.measures[i], cm = segLenCm(s, i);
+    let text, color, bold = m != null;
     if(cm == null){ if(!sel) continue; text = '? misura'; color = '#9aa4b2'; }
+    else if(s.geo){ text = (s.geo.measured ? '' : '≈ ') + fmtLen(cm); color = s.geo.measured ? '#1b2330' : '#6b7686'; bold = !!s.geo.measured; }
     else if(m != null){ const bad = Math.abs(cm - m) / m > 0.005; text = fmtLen(cm); color = bad ? '#d93a3a' : '#1b2330'; }
     else { text = '≈ ' + fmtLen(cm); color = '#6b7686'; }
     const mid = {x:(A.x+B.x)/2, y:(A.y+B.y)/2};
@@ -802,7 +1234,7 @@ function drawLabels(s){
     if(nx*(mid.x-C.x) + ny*(mid.y-C.y) < 0){ nx = -nx; ny = -ny; }
     let ang = Math.atan2(B.y-A.y, B.x-A.x);
     if(ang > Math.PI/2) ang -= Math.PI; if(ang < -Math.PI/2) ang += Math.PI;
-    pill(text, mid.x + nx*15, mid.y + ny*15, ang, color, null, m != null);
+    pill(text, mid.x + nx*15, mid.y + ny*15, ang, color, null, bold);
   }
 }
 function drawDraft(){
@@ -839,17 +1271,18 @@ let gesture = null, gestureLock = false;
 function sp(e){ const r = cv.getBoundingClientRect(); return {x: e.clientX - r.left, y: e.clientY - r.top}; }
 
 cv.addEventListener('pointerdown', e => {
-  lastPT = e.pointerType; cv.setPointerCapture(e.pointerId);
+  lastPT = e.pointerType; try{ cv.setPointerCapture(e.pointerId); }catch(err){}
   const p = sp(e); pointers.set(e.pointerId, p);
   if(pointers.size === 2){
     // inizia pinch/pan con due dita: annulla l'azione singola
     if(act && act.type === 'line' && act.startedNow) draft = [];
-    act = null; rubber = draft.length ? rubber : null;
+    act = null; act3 = null; rubber = draft.length ? rubber : null;
     const [a, b] = [...pointers.values()];
-    gesture = {mid:{x:(a.x+b.x)/2, y:(a.y+b.y)/2}, d: Math.max(dist(a,b), 1), view:{...view}};
+    gesture = {mid:{x:(a.x+b.x)/2, y:(a.y+b.y)/2}, d: Math.max(dist(a,b), 1), view:{...view}, cam:{...cam}};
     gestureLock = true; refresh(); return;
   }
   if(pointers.size > 2 || gestureLock) return;
+  if(mode === '3d'){ act3 = {down:p, last:p, moved:false, pan: e.button === 1 || e.button === 2 || e.shiftKey}; return; }
   if(e.button === 1 || e.button === 2){ act = {type:'pan', down:p, view0:{...view}, moved:true}; return; }
   onDown(p);
   draw();
@@ -859,11 +1292,17 @@ cv.addEventListener('pointermove', e => {
   if(pointers.has(e.pointerId)) pointers.set(e.pointerId, p);
   if(gesture && pointers.size >= 2){
     const [a, b] = [...pointers.values()];
-    const mid = {x:(a.x+b.x)/2, y:(a.y+b.y)/2}, d = Math.max(dist(a,b), 1);
-    const z = Math.max(0.01, Math.min(200, gesture.view.z * d / gesture.d));
+    const mid = {x:(a.x+b.x)/2, y:(a.y+b.y)/2}, f = Math.max(dist(a,b), 1) / gesture.d;
+    if(mode === '3d'){
+      const g = gesture.cam, W = cv.clientWidth, H = cv.clientHeight, k = clamp(g.k * f, ZMIN, ZMAX);
+      const X = (gesture.mid.x - W/2 - g.px)/g.k, U = (gesture.mid.y - H/2 - g.py)/g.k;
+      cam.k = k; cam.px = mid.x - W/2 - X*k; cam.py = mid.y - H/2 - U*k; draw(); return;
+    }
+    const z = clamp(gesture.view.z * f, ZMIN, ZMAX);
     const wm = {x:(gesture.mid.x - gesture.view.x)/gesture.view.z, y:(gesture.mid.y - gesture.view.y)/gesture.view.z};
     view = {z, x: mid.x - wm.x*z, y: mid.y - wm.y*z}; draw(); return;
   }
+  if(mode === '3d'){ if(act3) move3D(p); return; }
   if(act){ onMove(p); draw(); return; }
   if(e.pointerType === 'mouse' && tool === 'line' && draft.length && !gestureLock){
     rubber = snapPoint(toW(p), draft[draft.length-1]); draw();
@@ -873,12 +1312,13 @@ function endPointer(e){
   const p = sp(e);
   pointers.delete(e.pointerId);
   if(gesture){ if(pointers.size < 2) gesture = null; }
+  else if(mode === '3d'){ if(act3) up3D(p); }
   else if(act){ onUp(p); }
   if(pointers.size === 0) gestureLock = false;
   refresh();
 }
 cv.addEventListener('pointerup', endPointer);
-cv.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); act = null; gesture = null; if(!pointers.size) gestureLock = false; refresh(); });
+cv.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); act = null; act3 = null; gesture = null; if(!pointers.size) gestureLock = false; refresh(); });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(sp(e), Math.exp(-e.deltaY * 0.0015)); }, {passive:false});
 
@@ -890,9 +1330,9 @@ function onDown(p){
     if(!draft.length){ draft = [snapPoint(w, null)]; startedNow = true; rubber = null; }
     else rubber = snapPoint(w, from);
     act = {type:'line', down:p, moved:false, startedNow};
-  } else if(tool === 'rect'){
+  } else if(tool === 'shape'){
     const a = snapPoint(w, null);
-    act = {type:'rect', down:p, moved:false, a, b:a};
+    act = {type:'shape', down:p, moved:false, a, b:a};
   } else if(tool === 'free'){
     act = {type:'free', down:p, moved:false, pts:[w]};
   } else {
@@ -911,7 +1351,7 @@ function onMove(p){
   if(!act.moved && dist(p, act.down) > (lastPT === 'touch' ? 9 : 5)) act.moved = true;
   switch(act.type){
     case 'line': rubber = snapPoint(w, act.startedNow && draft.length === 1 ? draft[0] : draft[draft.length-1]); break;
-    case 'rect': if(act.moved) act.b = snapPoint(w, null); break;
+    case 'shape': if(act.moved) act.b = snapPoint(w, null); break;
     case 'free': { const l = act.pts[act.pts.length-1]; if(dist(ws(l), p) > 2) act.pts.push(w); break; }
     case 'pan': view.x = act.view0.x + (p.x - act.down.x); view.y = act.view0.y + (p.y - act.down.y); break;
     case 'vertex':
@@ -923,7 +1363,7 @@ function onMove(p){
     case 'seg': case 'move':
       if(!act.moved) return;
       if(!act.pushed){ pushHistory(); act.pushed = true; }
-      { const dx = w.x - act.last.x, dy = w.y - act.last.y; act.shape.pts.forEach(q => { q.x += dx; q.y += dy; }); act.last = w; }
+      moveShape(act.shape, w.x - act.last.x, w.y - act.last.y); act.last = w;
       break;
   }
 }
@@ -931,7 +1371,7 @@ function onUp(p){
   const a = act; act = null;
   const near = (u, v) => dist(ws(u), ws(v)) < tolPx();
   // un tocco (senza trascinare) su un lato apre la misura con qualsiasi strumento
-  const tapSegment = () => { const hs = hitSegment(p); if(hs && !hitVertex(p)){ openMeasure(hs.shape, hs.idx); return true; } return false; };
+  const tapSegment = () => { const hs = hitSegment(p); if(hs && !hitVertex(p)){ openShapeOrSide(hs.shape, hs.idx); return true; } return false; };
   switch(a.type){
     case 'line': {
       if(!a.moved && a.startedNow){
@@ -947,11 +1387,16 @@ function onUp(p){
       if(lastPT !== 'mouse') rubber = null;
       break;
     }
-    case 'rect': {
-      if(!a.moved){ tapSegment(); break; }
-      const A = a.a, B = a.b;
-      if(Math.abs(B.x-A.x)*view.z < 8 || Math.abs(B.y-A.y)*view.z < 8) break;
-      commitShape([{x:A.x,y:A.y},{x:B.x,y:A.y},{x:B.x,y:B.y},{x:A.x,y:B.y}], true);
+    case 'shape': {
+      if(!a.moved){
+        if(tapSegment()) break;
+        const s = 70 / view.z, h = opts.shape === 'rect' ? s*0.65 : s;
+        addShape(buildFromBox({x:a.a.x - s, y:a.a.y - h}, {x:a.a.x + s, y:a.a.y + h}));
+        break;
+      }
+      if(Math.abs(a.b.x-a.a.x)*view.z < 8 && Math.abs(a.b.y-a.a.y)*view.z < 8) break;
+      if(SH[opts.shape].plain && opts.shape === 'rect' && (Math.abs(a.b.x-a.a.x)*view.z < 8 || Math.abs(a.b.y-a.a.y)*view.z < 8)) break;
+      addShape(buildFromBox(a.a, a.b));
       break;
     }
     case 'free': {
@@ -966,9 +1411,515 @@ function onUp(p){
       commitShape(pts.map(q => ({x:q.x, y:q.y})), closed);
       break;
     }
-    case 'seg': if(!a.moved) openMeasure(a.shape, a.idx); else save(); break;
-    case 'vertex': case 'move': if(a.moved) save(); break;
+    case 'seg': if(!a.moved) openShapeOrSide(a.shape, a.idx); else save(); break;
+    case 'move': if(a.moved) save(); else if(a.shape.geo) openShapeDims(a.shape); break;
+    case 'vertex': if(a.moved) save(); break;
   }
+}
+
+/* =================== 3D: SOLIDI E VOLUMI =================== */
+let cam = {yaw:-0.62, pitch:0.55, k:1, px:0, py:0}, act3 = null, viewIdx = 0, lastFaces = [];
+const VIEWS = [{yaw:-0.62, pitch:0.55, n:'Prospettiva'}, {yaw:0, pitch:0, n:'Di fronte'}, {yaw:-Math.PI/2, pitch:0, n:'Di lato'}, {yaw:0, pitch:Math.PI/2, n:'Dall’alto'}];
+const PALETTE = [[91,141,239],[245,158,11],[16,185,129],[239,68,68],[139,92,246],[6,182,212],[236,72,153],[132,204,22]];
+
+/* mesh: lista di facce {p:[[x,y,z]...], h:[anelli fori], e:true se disegnare gli spigoli}; normali verso l'esterno */
+function dedupe(p){ const o = []; p.forEach(q => { const l = o[o.length-1]; if(!l || Math.hypot(l[0]-q[0], l[1]-q[1], l[2]-q[2]) > 1e-9) o.push(q); }); if(o.length > 1){ const a = o[0], b = o[o.length-1]; if(Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]) <= 1e-9) o.pop(); } return o; }
+function revolve(prof, N = 40, sx = 1, sy = 1){
+  const F = [];
+  for(let j=0;j<prof.length-1;j++){
+    const [r1,z1] = prof[j], [r2,z2] = prof[j+1];
+    for(let i=0;i<N;i++){
+      const a = TAU*i/N, b = TAU*(i+1)/N, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+      const p = dedupe([[r1*ca*sx, r1*sa*sy, z1], [r1*cb*sx, r1*sb*sy, z1], [r2*cb*sx, r2*sb*sy, z2], [r2*ca*sx, r2*sa*sy, z2]]);
+      if(p.length >= 3) F.push({p, e:false});
+    }
+  }
+  return F;
+}
+const area2 = r => { let s = 0; for(let i=0;i<r.length;i++){ const a = r[i], b = r[(i+1)%r.length]; s += a[0]*b[1] - b[0]*a[1]; } return s/2; };
+function prism(poly, h, holes = [], e = true){
+  if(area2(poly) < 0) poly = poly.slice().reverse();
+  holes = holes.map(r => area2(r) > 0 ? r.slice().reverse() : r);
+  const at = (r, z) => r.map(q => [q[0], q[1], z]);
+  const F = [{p:at(poly, 0).reverse(), h:holes.map(r => at(r, 0).reverse()), e:true}, {p:at(poly, h), h:holes.map(r => at(r, h)), e:true}];
+  [poly, ...holes].forEach(r => { for(let i=0;i<r.length;i++){ const a = r[i], b = r[(i+1)%r.length]; F.push({p:[[a[0],a[1],0],[b[0],b[1],0],[b[0],b[1],h],[a[0],a[1],h]], e}); } });
+  return F;
+}
+function newell(p){ let x=0,y=0,z=0; for(let i=0;i<p.length;i++){ const a = p[i], b = p[(i+1)%p.length]; x += (a[1]-b[1])*(a[2]+b[2]); y += (a[2]-b[2])*(a[0]+b[0]); z += (a[0]-b[0])*(a[1]+b[1]); } const l = Math.hypot(x,y,z) || 1; return [x/l, y/l, z/l]; }
+function orientOut(F){ // per solidi convessi: gira le facce verso l'esterno
+  let c = [0,0,0], n = 0; F.forEach(f => f.p.forEach(q => { c[0]+=q[0]; c[1]+=q[1]; c[2]+=q[2]; n++; })); c = c.map(v => v/n);
+  F.forEach(f => { const nn = newell(f.p), m = f.p.reduce((a,q) => [a[0]+q[0]/f.p.length, a[1]+q[1]/f.p.length, a[2]+q[2]/f.p.length], [0,0,0]);
+    if(nn[0]*(m[0]-c[0]) + nn[1]*(m[1]-c[1]) + nn[2]*(m[2]-c[2]) < 0) f.p.reverse(); });
+  return F;
+}
+const rectRing = (l, w) => [[-l/2,-w/2],[l/2,-w/2],[l/2,w/2],[-l/2,w/2]];
+function sphereProf(r, n = 20){ const o = []; for(let i=0;i<=n;i++){ const a = -Math.PI/2 + Math.PI*i/n; o.push([r*Math.cos(a), r + r*Math.sin(a)]); } o[0][0] = 0; o[n][0] = 0; return o; }
+const SOL = {
+  box:{nm:'Parallelepipedo', ps:[Lp('l','Lunghezza'), Lp('w','Larghezza'), Lp('h','Altezza')], def:{l:300, w:200, h:150},
+    vol:p => p.l*p.w*p.h, mesh:p => prism(rectRing(p.l, p.w), p.h)},
+  cube:{nm:'Cubo', ps:[Lp('l','Lato')], def:{l:100}, vol:p => p.l**3, mesh:p => prism(rectRing(p.l, p.l), p.l)},
+  cyl:{nm:'Cilindro', ps:[Lp('d','Diametro'), Lp('h','Altezza')], def:{d:100, h:150},
+    vol:p => Math.PI*p.d*p.d/4*p.h, mesh:p => revolve([[0,0],[p.d/2,0],[p.d/2,p.h],[0,p.h]])},
+  tube:{nm:'Tubo (cilindro cavo)', ps:[Lp('D','Diametro esterno'), Lp('d','Diametro interno'), Lp('h','Altezza')], def:{D:100, d:80, h:200},
+    chk:p => p.d >= p.D ? 'Il diametro interno deve essere minore di quello esterno.' : null,
+    vol:p => Math.PI*(p.D*p.D - p.d*p.d)/4*p.h, mesh:p => revolve([[p.d/2,0],[p.D/2,0],[p.D/2,p.h],[p.d/2,p.h],[p.d/2,0]])},
+  cone:{nm:'Cono', ps:[Lp('d','Diametro di base'), Lp('h','Altezza')], def:{d:100, h:120},
+    vol:p => Math.PI*p.d*p.d*p.h/12, mesh:p => revolve([[0,0],[p.d/2,0],[0,p.h]])},
+  frustum:{nm:'Tronco di cono', ps:[Lp('D','Diametro inferiore'), Lp('d','Diametro superiore'), Lp('h','Altezza')], def:{D:120, d:70, h:100},
+    vol:p => Math.PI*p.h*(p.D*p.D + p.D*p.d + p.d*p.d)/12, mesh:p => revolve([[0,0],[p.D/2,0],[p.d/2,p.h],[0,p.h]])},
+  sphere:{nm:'Sfera', ps:[Lp('d','Diametro')], def:{d:100}, vol:p => Math.PI*p.d**3/6, mesh:p => revolve(sphereProf(p.d/2), 36)},
+  hemi:{nm:'Semisfera', ps:[Lp('d','Diametro')], def:{d:120},
+    vol:p => Math.PI*p.d**3/12, mesh:p => { const r = p.d/2, pr = [[0,0]]; for(let i=0;i<=12;i++){ const a = Math.PI/2*i/12; pr.push([r*Math.cos(a), r*Math.sin(a)]); } pr[pr.length-1][0] = 0; return revolve(pr, 36); }},
+  cap:{nm:'Calotta sferica', ps:[Lp('d','Diametro di base'), Lp('h','Altezza')], def:{d:150, h:40},
+    vol:p => Math.PI*p.h*(3*(p.d/2)**2 + p.h*p.h)/6,
+    mesh:p => { const a = p.d/2, R = (a*a + p.h*p.h)/(2*p.h), zc = p.h - R, t0 = Math.atan2(-zc, a), pr = [[0,0]];
+      for(let i=0;i<=12;i++){ const t = t0 + (Math.PI/2 - t0)*i/12; pr.push([R*Math.cos(t), zc + R*Math.sin(t)]); } pr[pr.length-1][0] = 0; return revolve(pr, 36); }},
+  ellipsoid:{nm:'Ellissoide', ps:[Lp('a','Lunghezza'), Lp('b','Larghezza'), Lp('c','Altezza')], def:{a:160, b:100, c:80},
+    vol:p => Math.PI*p.a*p.b*p.c/6, mesh:p => revolve(sphereProf(p.c/2), 36, p.a/p.c, p.b/p.c)},
+  pyramid:{nm:'Piramide', ps:[Lp('l','Lunghezza base'), Lp('w','Larghezza base'), Lp('h','Altezza')], def:{l:120, w:120, h:110},
+    vol:p => p.l*p.w*p.h/3, mesh:p => { const b = rectRing(p.l, p.w).map(q => [q[0], q[1], 0]), t = [0,0,p.h];
+      return orientOut([{p:b.slice(), e:true}, ...b.map((q,i) => ({p:[q, b[(i+1)%4], t], e:true}))]); }},
+  pyrFr:{nm:'Tronco di piramide', ps:[Lp('L','Lunghezza base inferiore'), Lp('W','Larghezza base inferiore'), Lp('l','Lunghezza base superiore'), Lp('w','Larghezza base superiore'), Lp('h','Altezza')],
+    def:{L:150, W:120, l:80, w:60, h:90}, vol:p => p.h/6*(p.L*p.W + p.l*p.w + (p.L+p.l)*(p.W+p.w)),
+    mesh:p => { const b = rectRing(p.L, p.W).map(q => [q[0], q[1], 0]), t = rectRing(p.l, p.w).map(q => [q[0], q[1], p.h]);
+      return orientOut([{p:b.slice(), e:true}, {p:t.slice(), e:true}, ...b.map((q,i) => ({p:[q, b[(i+1)%4], t[(i+1)%4], t[i]], e:true}))]); }},
+  triPrism:{nm:'Prisma triangolare', ps:[Lp('b','Base del triangolo'), Lp('t','Altezza del triangolo'), Lp('l','Lunghezza')], def:{b:120, t:80, l:250},
+    vol:p => p.b*p.t/2*p.l, mesh:p => { const tri = y => [[-p.b/2, y, 0], [p.b/2, y, 0], [0, y, p.t]], A = tri(-p.l/2), B = tri(p.l/2);
+      return orientOut([{p:A, e:true}, {p:B, e:true}, ...A.map((q,i) => ({p:[q, A[(i+1)%3], B[(i+1)%3], B[i]], e:true}))]); }},
+  hexPrism:{nm:'Prisma esagonale', ps:[Lp('a','Lato dell’esagono'), Lp('h','Altezza')], def:{a:60, h:150},
+    vol:p => 3*Math.sqrt(3)/2*p.a*p.a*p.h, mesh:p => prism(regPts(6, p.a).map(q => [q.x, q.y]), p.h)},
+  torus:{nm:'Toro (ciambella)', ps:[Lp('D','Diametro esterno'), Lp('d','Diametro della sezione')], def:{D:160, d:50},
+    chk:p => p.D <= 2*p.d ? 'Il diametro esterno deve essere più del doppio della sezione.' : null,
+    vol:p => { const R = (p.D - p.d)/2, r = p.d/2; return 2*Math.PI*Math.PI*R*r*r; },
+    mesh:p => { const R = (p.D - p.d)/2, r = p.d/2, pr = []; for(let i=0;i<=24;i++){ const t = -Math.PI/2 + TAU*i/24; pr.push([R + r*Math.cos(t), r + r*Math.sin(t)]); } return revolve(pr, 40); }},
+  extrude:{nm:'Forma 2D estrusa', ps:[Lp('h','Altezza / spessore')]},
+};
+const SOL_ORDER = ['box','cube','cyl','tube','cone','frustum','sphere','hemi','cap','ellipsoid','pyramid','pyrFr','triPrism','hexPrism','torus'];
+
+function solidMesh(so){
+  const T = SOL[so.t]; if(!T) return null;
+  if(so.t === 'extrude'){
+    const s = D.shapes.find(x => x.id === so.sid);
+    if(!s || !s.closed || !D.scale || !(so.p.h > 0)) return null;
+    const c = centroid(s.pts), k = D.scale, tr = q => [(q.x - c.x)*k, -(q.y - c.y)*k];
+    return prism(s.pts.map(tr), so.p.h, (s.holes||[]).map(r => r.map(tr)), !isCurved(s));
+  }
+  return T.mesh(so.p);
+}
+function solidVol(so){
+  if(so.t === 'extrude'){ const s = D.shapes.find(x => x.id === so.sid); const a = s && shapeAreaCm2(s); return a ? a * so.p.h : null; }
+  return SOL[so.t].vol(so.p);
+}
+function solidName(so){
+  if(so.t === 'extrude'){ const s = D.shapes.find(x => x.id === so.sid), k = D.shapes.indexOf(s); return s ? 'Estrusione di ' + shapeLabel(s, k).replace(/^\d+\. /, '') : 'Estrusione (forma eliminata)'; }
+  return SOL[so.t].nm;
+}
+function solidDims(so){
+  if(so.t === 'extrude'){ const s = D.shapes.find(x => x.id === so.sid); const a = s && shapeAreaCm2(s); return (a ? 'area ' + fmtArea(a, 'm') + ' × ' : '') + 'h ' + fmtLen(so.p.h, 'm'); }
+  return SOL[so.t].ps.map(q => q.n.replace(/ (di base|del triangolo|della sezione|dell’esagono)$/, '') + ' ' + fmtLen(so.p[q.k], 'm')).join(', ');
+}
+function buildScene(solids){
+  const items = [];
+  solids.forEach((so, idx) => {
+    const F = solidMesh(so); if(!F || !F.length) return;
+    const b = [Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity];
+    F.forEach(f => f.p.forEach(q => { for(let i=0;i<3;i++){ b[i] = Math.min(b[i], q[i]); b[i+3] = Math.max(b[i+3], q[i]); } }));
+    items.push({so, idx, F, b});
+  });
+  if(!items.length) return {items, T:[0,0,0], size:1};
+  const maxD = Math.max(...items.map(it => Math.max(it.b[3]-it.b[0], it.b[4]-it.b[1], it.b[5]-it.b[2])));
+  const gap = maxD * 0.3;
+  let x = 0, zmax = 0;
+  items.forEach(it => { it.dx = x - it.b[0]; it.dy = -(it.b[1] + it.b[4])/2; x += it.b[3] - it.b[0] + gap; zmax = Math.max(zmax, it.b[5]); });
+  const tw = x - gap;
+  items.forEach(it => {
+    it.dx -= tw/2;
+    const mv = q => [q[0] + it.dx, q[1] + it.dy, q[2]];
+    it.F = it.F.map(f => ({p:f.p.map(mv), h:f.h ? f.h.map(r => r.map(mv)) : null, e:f.e, n:newell(f.p)}));
+    it.top = [(it.b[0] + it.b[3])/2 + it.dx, 0, it.b[5]];
+  });
+  const yspan = Math.max(...items.map(it => it.b[4] - it.b[1]));
+  return {items, T:[0, 0, zmax/2], size:Math.max(tw, yspan, zmax), tw, yspan};
+}
+function mkProj(W, H, c, T){
+  const cy = Math.cos(c.yaw), sy = Math.sin(c.yaw), cp = Math.cos(c.pitch), sp = Math.sin(c.pitch);
+  const f = q => { const x = q[0]-T[0], y = q[1]-T[1], z = q[2]-T[2]; const X = x*cy - y*sy, Yd = x*sy + y*cy;
+    const U = Yd*sp + z*cp; return {x: W/2 + c.px + X*c.k, y: H/2 + c.py - U*c.k, d: Yd*cp - z*sp, X, U}; };
+  f.n = n => { const X = n[0]*cy - n[1]*sy, Yd = n[0]*sy + n[1]*cy; return [X, Yd*sp + n[2]*cp, Yd*cp - n[2]*sp]; };
+  return f;
+}
+function fitCam(c, W, H, sc){
+  if(!sc.items.length){ c.k = 1; c.px = 0; c.py = 0; return; }
+  const f = mkProj(W, H, {...c, k:1, px:0, py:0}, sc.T);
+  let x0=Infinity,x1=-Infinity,u0=Infinity,u1=-Infinity;
+  sc.items.forEach(it => it.F.forEach(fc => fc.p.forEach(q => { const r = f(q); x0=Math.min(x0,r.X); x1=Math.max(x1,r.X); u0=Math.min(u0,r.U); u1=Math.max(u1,r.U); })));
+  c.k = clamp(Math.min((W - 70)/Math.max(x1-x0, 1e-9), (H - 150)/Math.max(u1-u0, 1e-9)), ZMIN, ZMAX);
+  c.px = -c.k*(x0+x1)/2; c.py = c.k*(u0+u1)/2 + 12;
+}
+function fit3D(){ if(!D) return; fitCam(cam, cv.clientWidth, cv.clientHeight, buildScene(D.solids)); draw(); }
+function zoom3D(p, f){
+  const W = cv.clientWidth, H = cv.clientHeight, k = clamp(cam.k * f, ZMIN, ZMAX);
+  const X = (p.x - W/2 - cam.px)/cam.k, U = (p.y - H/2 - cam.py)/cam.k;
+  cam.k = k; cam.px = p.x - W/2 - X*k; cam.py = p.y - H/2 - U*k; draw();
+}
+/* disegna la scena 3D su un canvas qualsiasi (schermo o immagine per il PDF) */
+function render3D(c, W, H, cm, o){
+  const sc = buildScene(o.solids);
+  c.fillStyle = o.bg || '#fbfcfe'; c.fillRect(0, 0, W, H);
+  if(!sc.items.length) return [];
+  const P = mkProj(W, H, cm, sc.T);
+  if(o.grid !== false){
+    const step = niceStep(sc.size/6), ex = step*2;
+    const xa = Math.floor((-sc.tw/2 - ex)/step)*step, xb = Math.ceil((sc.tw/2 + ex)/step)*step, ya = Math.floor((-sc.yspan/2 - ex)/step)*step, yb = Math.ceil((sc.yspan/2 + ex)/step)*step;
+    c.lineWidth = 1; c.strokeStyle = '#e3e7ee';
+    c.beginPath();
+    for(let x = xa; x <= xb + 1e-9; x += step){ const a = P([x, ya, 0]), b = P([x, yb, 0]); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); }
+    for(let y = ya; y <= yb + 1e-9; y += step){ const a = P([xa, y, 0]), b = P([xb, y, 0]); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); }
+    c.stroke();
+  }
+  const L = [-0.35, 0.75, -0.56], faces = [];
+  sc.items.forEach(it => it.F.forEach(f => {
+    const nv = P.n(f.n); if(nv[2] > 1e-6) return;           // faccia girata dall'altra parte
+    const pr = f.p.map(P); const d = pr.reduce((a,q) => a + q.d, 0)/pr.length;
+    faces.push({it, f, pr, hr: f.h ? f.h.map(r => r.map(P)) : null, d, I: Math.max(0, nv[0]*L[0] + nv[1]*L[1] + nv[2]*L[2])});
+  }));
+  faces.sort((a,b) => b.d - a.d);
+  faces.forEach(fc => {
+    const sel = fc.it.so.id === o.sel, base = sel ? [31,111,235] : PALETTE[fc.it.idx % PALETTE.length];
+    const k = 0.5 + 0.5*fc.I, col = base.map(v => Math.round(v*k + 255*(1-k)*0.25));
+    c.beginPath();
+    [fc.pr, ...(fc.hr || [])].forEach(r => { r.forEach((q,i) => i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y)); c.closePath(); });
+    c.fillStyle = `rgb(${col})`; c.fill('evenodd');
+    c.lineJoin = 'round';
+    if(fc.f.e){ c.strokeStyle = sel ? '#0b3d91' : 'rgba(20,30,50,.55)'; c.lineWidth = 1; }
+    else { c.strokeStyle = `rgb(${col})`; c.lineWidth = 0.8; }
+    c.stroke();
+  });
+  if(o.labels !== false) sc.items.forEach(it => {
+    const t = P(it.top), v = solidVol(it.so);
+    pill((it.idx + 1) + (v != null ? ' · ' + fmtVol(v) : ''), t.x, t.y - 18, 0, it.so.id === o.sel ? '#fff' : '#1b2330', it.so.id === o.sel ? '#1f6feb' : null, true, c);
+  });
+  return faces;
+}
+function draw3D(){
+  const W = cv.clientWidth, H = cv.clientHeight;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  lastFaces = render3D(ctx, W, H, cam, {solids:D.solids, sel:selSolid});
+  if(!D.solids.length){
+    ctx.fillStyle = '#9aa4b2'; ctx.font = '600 15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Nessun solido: premi “Aggiungi solido”', W/2, H/2);
+  } else if(!lastFaces.length && D.solids.length){
+    ctx.fillStyle = '#9aa4b2'; ctx.font = '600 14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Le estrusioni hanno bisogno delle misure nel disegno 2D', W/2, H/2);
+  }
+}
+function inScreenPoly(p, r){ let c = false; for(let i=0, j=r.length-1; i<r.length; j=i++){ const a = r[i], b = r[j]; if(((a.y > p.y) !== (b.y > p.y)) && (p.x < (b.x-a.x)*(p.y-a.y)/(b.y-a.y) + a.x)) c = !c; } return c; }
+function pick3D(p){
+  for(let i = lastFaces.length - 1; i >= 0; i--){ const f = lastFaces[i]; if(inScreenPoly(p, f.pr) && !(f.hr || []).some(h => inScreenPoly(p, h))) return f.it.so.id; }
+  return null;
+}
+function move3D(p){
+  if(!act3.moved && dist(p, act3.down) > (lastPT === 'touch' ? 8 : 4)) act3.moved = true;
+  if(!act3.moved) return;
+  const dx = p.x - act3.last.x, dy = p.y - act3.last.y; act3.last = p;
+  if(act3.pan){ cam.px += dx; cam.py += dy; }
+  else { cam.yaw += dx*0.01; cam.pitch = clamp(cam.pitch + dy*0.01, -1.5707, 1.5707); }
+  draw();
+}
+function up3D(p){
+  const a = act3; act3 = null; if(!a || a.moved) return;
+  const id = pick3D(p);
+  if(id && id === selSolid){ const so = D.solids.find(s => s.id === id); if(so) openSolidForm(so); }
+  else selSolid = id;
+}
+
+/* ---- comandi 3D ---- */
+const solidIconCache = {};
+function solidIcon(t){
+  if(solidIconCache[t]) return solidIconCache[t];
+  const c = document.createElement('canvas'); c.width = 120; c.height = 88;
+  const x = c.getContext('2d'), so = {id:'x', t, p:{...SOL[t].def}};
+  const sc = buildScene([so]), cm = {yaw:-0.62, pitch:0.5, k:1, px:0, py:0};
+  fitCam(cm, 120, 88 + 60, sc); cm.py -= 8;
+  render3D(x, 120, 88, cm, {solids:[so], labels:false, grid:false, bg:'#ffffff', sel:null});
+  return solidIconCache[t] = c.toDataURL();
+}
+$('#s3Add').onclick = () => {
+  openModal(`<h3>Aggiungi un solido</h3><p>Scegli la forma, poi scrivi le sue misure: il volume viene calcolato subito.</p>
+    <div class="pick-grid">${SOL_ORDER.map(t => `<button class="pick" data-t="${t}"><img alt="" src="${solidIcon(t)}">${esc(SOL[t].nm)}</button>`).join('')}</div>
+    <div class="mrow"><button class="btn ghost" id="pkClose">Chiudi</button></div>`, null, true);
+  $('#pkClose').onclick = closeModal;
+  $('#modalBox').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { closeModal(); openSolidForm({id:uid(), t:b.dataset.t, p:{...SOL[b.dataset.t].def}, name:''}, true); });
+};
+$('#s3Ext').onclick = () => {
+  const cands = D.shapes.filter(s => s.closed);
+  if(!cands.length) return toast('Disegna prima una forma chiusa nel 2D');
+  if(!D.scale) return toast('Inserisci prima almeno una misura nel disegno 2D');
+  const sel = cands.find(s => s.id === selShape) || cands[0];
+  openSolidForm({id:uid(), t:'extrude', sid:sel.id, p:{h:20}, name:''}, true);
+};
+$('#s3Edit').onclick = () => { const so = D.solids.find(s => s.id === selSolid); if(so) openSolidForm(so); else toast('Tocca prima un solido per selezionarlo'); };
+$('#s3Del').onclick = deleteSolid;
+$('#s3Undo').onclick = undo;
+$('#s3Vol').onclick = () => { resultKind = resultKind === 'vol' ? null : 'vol'; renderResult(); };
+$('#s3View').onclick = () => { viewIdx = (viewIdx + 1) % VIEWS.length; const v = VIEWS[viewIdx]; cam.yaw = v.yaw; cam.pitch = v.pitch; fit3D(); toast('Vista: ' + v.n); };
+$('#s3Dup').onclick = () => {
+  const so = D.solids.find(s => s.id === selSolid); if(!so) return toast('Tocca prima un solido per selezionarlo');
+  pushHistory(); const c = JSON.parse(JSON.stringify(so)); c.id = uid(); D.solids.push(c); selSolid = c.id; save(); fit3D(); refresh();
+};
+function deleteSolid(){
+  if(!selSolid) return toast('Tocca prima un solido per selezionarlo');
+  pushHistory(); D.solids = D.solids.filter(s => s.id !== selSolid); selSolid = null; save(); refresh(); toast('Solido eliminato · premi Annulla per recuperarlo');
+}
+function openSolidForm(so, isNew){
+  const T = SOL[so.t];
+  const fields = T.ps.map(q => ({k:q.k, n:q.n, t:'len', v:so.p[q.k]}));
+  if(so.t === 'extrude') fields.unshift({k:'sid', n:'Forma 2D da estrudere', t:'sel', v:so.sid,
+    opts:D.shapes.map((s,k) => [s, k]).filter(([s]) => s.closed).map(([s,k]) => [s.id, shapeLabel(s,k) + (shapeAreaCm2(s) ? ' — ' + fmtArea(shapeAreaCm2(s), 'm') : '')])});
+  paramForm({
+    title: (isNew ? 'Nuovo: ' : 'Misure: ') + (so.t === 'extrude' ? 'Estrusione' : T.nm),
+    desc: so.t === 'extrude' ? 'La forma del disegno 2D viene “alzata” dell’altezza che scrivi (es. spessore del massetto, altezza della stanza). Volume = area × altezza.' : '',
+    fields, name:{v:so.name, ph:so.t === 'extrude' ? 'es. Massetto soggiorno' : T.nm}, okLabel: isNew ? 'Crea' : 'Salva',
+    onDel: isNew ? null : () => { selSolid = so.id; deleteSolid(); }, delLabel:'Elimina solido',
+    onSave: (vals, ex) => {
+      const np = {...so.p};
+      for(const q of T.ps){ if(vals[q.k] == null) return 'Scrivi “' + q.n + '”.'; np[q.k] = vals[q.k]; }
+      const err = T.chk && T.chk(np); if(err) return err;
+      pushHistory();
+      so.p = np; so.name = ex.name || ''; if(so.t === 'extrude') so.sid = vals.sid;
+      if(ex.unit !== D.unit) setUnit(ex.unit);
+      if(isNew) D.solids.push(so);
+      selSolid = so.id; save(); if(isNew) fit3D(); refresh();
+      if(isNew) toast('Volume: ' + (solidVol(so) != null ? fmtVol(solidVol(so)) : '—'));
+      return null;
+    }
+  });
+}
+function renderVolumes(el){
+  let body = '';
+  if(!D.solids.length) body = `<div class="note">Nessun solido. Premi <b>Aggiungi solido</b> oppure <b>Estrudi forma</b> per alzare una forma del disegno 2D.</div>`;
+  else {
+    let tot = 0;
+    D.solids.forEach((so, i) => {
+      const v = solidVol(so), sel = so.id === selSolid ? ' sel' : '';
+      if(v != null) tot += v;
+      body += `<div class="row${sel}"><span>${i+1}. ${esc(so.name || solidName(so))}<span class="sub">${esc(solidDims(so))}</span></span><span class="v">${v != null ? fmtVol(v) : '—'}<span class="sub">${v != null ? fmtLitri(v) : 'servono le misure 2D'}</span></span></div>`;
+    });
+    if(D.solids.length > 1) body += `<div class="row tot"><span><b>Totale</b></span><span class="v">${fmtVol(tot)}<span class="sub">${fmtLitri(tot)}</span></span></div>`;
+    body += `<div class="mrow"><button class="btn sm primary" id="rPdf">📄 Computo metrico PDF</button></div>`;
+  }
+  el.innerHTML = `<h4>Volume<button id="rClose" aria-label="Chiudi">✕</button></h4>${body}`;
+  $('#rClose').onclick = () => { resultKind = null; renderResult(); };
+  const rp = $('#rPdf'); if(rp) rp.onclick = openComputo;
+}
+
+/* =================== COMPUTO METRICO + PDF =================== */
+function openComputo(){
+  if(!D.shapes.length && !D.solids.length) return toast('Disegna prima qualcosa');
+  let h = `<h3>Computo metrico</h3><p>Dai un nome a ogni voce (es. “Pavimento cucina”): comparirà nel PDF insieme a misure, superfici e volumi.</p>`;
+  if(D.shapes.length){
+    let tot = 0;
+    h += `<div class="cm-h">Superfici</div><div class="cm-list">` + D.shapes.map((s,k) => {
+      const a = shapeAreaCm2(s); if(a) tot += a;
+      return `<div class="cm-row"><span class="cm-n">${k+1}</span><input class="inp" data-sh="${s.id}" maxlength="80" placeholder="${esc(typeName(s))}" value="${esc(s.name||'')}"><span class="cm-v">${a != null ? fmtArea(a,'m') : '—'}<small>${a != null ? esc(typeName(s)) : (s.closed ? 'senza misure' : 'linea aperta')}</small></span></div>`;
+    }).join('') + `</div><div class="cm-tot"><span>Totale superficie</span><span>${D.scale ? fmtArea(tot,'m') : '—'}</span></div>`;
+    if(!D.scale) h += `<p style="margin-top:8px">ℹ️ Il disegno non ha ancora misure: tocca un lato e scrivi la lunghezza reale per avere i m².</p>`;
+  }
+  if(D.solids.length){
+    let tot = 0;
+    h += `<div class="cm-h">Volumi</div><div class="cm-list">` + D.solids.map((so,i) => {
+      const v = solidVol(so); if(v != null) tot += v;
+      return `<div class="cm-row"><span class="cm-n v3">${i+1}</span><input class="inp" data-so="${so.id}" maxlength="80" placeholder="${esc(solidName(so))}" value="${esc(so.name||'')}"><span class="cm-v">${v != null ? fmtVol(v) : '—'}<small>${v != null ? fmtLitri(v) : ''}</small></span></div>`;
+    }).join('') + `</div><div class="cm-tot"><span>Totale volume</span><span>${fmtVol(tot)}</span></div>`;
+  }
+  h += `<div id="pdfErr" class="err hidden"></div><div class="mrow"><button class="btn ghost" id="cmClose">Chiudi</button><button class="btn primary" id="cmPdf">📄 Scarica PDF</button></div>`;
+  const keep = () => {
+    let ch = false;
+    $('#modalBox').querySelectorAll('[data-sh]').forEach(i => { const s = D.shapes.find(x => x.id === i.dataset.sh); if(s && (s.name||'') !== i.value.trim()){ s.name = i.value.trim(); ch = true; } });
+    $('#modalBox').querySelectorAll('[data-so]').forEach(i => { const s = D.solids.find(x => x.id === i.dataset.so); if(s && (s.name||'') !== i.value.trim()){ s.name = i.value.trim(); ch = true; } });
+    if(ch){ save(); renderResult(); }
+  };
+  openModal(h, null, true);
+  $('#modalBox').querySelectorAll('input').forEach(i => { i.addEventListener('input', keep); });
+  $('#cmClose').onclick = () => { keep(); closeModal(); };
+  $('#cmPdf').onclick = async () => {
+    keep();
+    const b = $('#cmPdf'); b.disabled = true; b.textContent = 'Preparo il PDF…';
+    try{
+      const bytes = buildPdf();
+      const name = (D.name.replace(/[\\/:*?"<>|]+/g, ' ').trim() || 'disegno') + ' - computo metrico.pdf';
+      const ok = await saveFile(name, new Blob([bytes], {type:'application/pdf'}));
+      closeModal(); if(ok) toast('PDF pronto ✓');
+    }catch(e){
+      console.error(e); b.disabled = false; b.textContent = '📄 Scarica PDF';
+      const er = $('#pdfErr'); if(er){ er.textContent = 'Non sono riuscito a creare il PDF: ' + (e && e.message || e); er.classList.remove('hidden'); }
+    }
+  };
+}
+
+/* ---- generatore PDF minimo (nessuna libreria): testo, linee, poligoni, immagini JPEG ---- */
+const HW = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+const CP1252 = {'€':128,'‚':130,'„':132,'…':133,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,'›':155,'‹':139,'≈':126,'−':45};
+function pdfTxt(s){
+  let o = '';
+  for(const ch of String(s)){
+    let c = ch.codePointAt(0);
+    if(CP1252[ch] != null) c = CP1252[ch]; else if(c > 255 || (c >= 127 && c < 160)) c = 63;
+    const C = String.fromCharCode(c);
+    o += (C === '(' || C === ')' || C === '\\') ? '\\' + C : C;
+  }
+  return o;
+}
+function tw(s, size, bold){ let w = 0; for(const ch of String(s)){ const c = ch.charCodeAt(0); w += (c >= 32 && c < 127) ? HW[c-32] : 556; } return w*size/1000*(bold ? 1.06 : 1); }
+function fitTxt(s, size, maxw, bold){ s = String(s); if(tw(s, size, bold) <= maxw) return s; while(s.length > 1 && tw(s + '…', size, bold) > maxw) s = s.slice(0, -1); return s + '…'; }
+const n2 = v => (Math.round(v*100)/100).toString();
+const latin1 = s => { const b = new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i] = s.charCodeAt(i) & 255; return b; };
+class PDF {
+  constructor(){ this.W = 595.28; this.H = 841.89; this.pages = []; this.imgs = []; this.newPage(); }
+  newPage(){ this.c = []; this.pages.push(this.c); }
+  op(s){ this.c.push(s); }
+  col(c){ return c.map(v => n2(v)).join(' '); }
+  text(x, y, s, size = 10, bold = false, align = 'left', color = [0.106,0.137,0.188]){
+    const w = tw(s, size, bold); if(align === 'right') x -= w; else if(align === 'center') x -= w/2;
+    this.op(`BT /${bold ? 'F2' : 'F1'} ${size} Tf ${this.col(color)} rg ${n2(x)} ${n2(y)} Td (${pdfTxt(s)}) Tj ET`);
+  }
+  line(x1, y1, x2, y2, color = [0.85,0.87,0.91], w = 0.8){ this.op(`${this.col(color)} RG ${w} w ${n2(x1)} ${n2(y1)} m ${n2(x2)} ${n2(y2)} l S`); }
+  fillRect(x, y, w, h, color){ this.op(`${this.col(color)} rg ${n2(x)} ${n2(y)} ${n2(w)} ${n2(h)} re f`); }
+  strokeRect(x, y, w, h, color, lw = 0.8){ this.op(`${this.col(color)} RG ${lw} w ${n2(x)} ${n2(y)} ${n2(w)} ${n2(h)} re S`); }
+  circle(x, y, r, color){ const k = 0.5523*r; this.op(`${this.col(color)} rg ${n2(x+r)} ${n2(y)} m ${n2(x+r)} ${n2(y+k)} ${n2(x+k)} ${n2(y+r)} ${n2(x)} ${n2(y+r)} c ${n2(x-k)} ${n2(y+r)} ${n2(x-r)} ${n2(y+k)} ${n2(x-r)} ${n2(y)} c ${n2(x-r)} ${n2(y-k)} ${n2(x-k)} ${n2(y-r)} ${n2(x)} ${n2(y-r)} c ${n2(x+k)} ${n2(y-r)} ${n2(x+r)} ${n2(y-k)} ${n2(x+r)} ${n2(y)} c f`); }
+  image(bytes, iw, ih, x, y, w, h){ this.imgs.push({bytes, w:iw, h:ih}); this.op(`q ${n2(w)} 0 0 ${n2(h)} ${n2(x)} ${n2(y)} cm /Im${this.imgs.length} Do Q`); }
+  build(){
+    const objs = [], add = o => { objs.push(o); return objs.length; };
+    add('<< /Type /Catalog /Pages 2 0 R >>'); add(null);
+    const f1 = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+    const f2 = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+    const im = this.imgs.map(i => add({dict:`<< /Type /XObject /Subtype /Image /Width ${i.w} /Height ${i.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${i.bytes.length} >>`, bin:i.bytes}));
+    const xo = im.map((id, i) => `/Im${i+1} ${id} 0 R`).join(' ');
+    const kids = this.pages.map(c => {
+      const b = latin1(c.join('\n'));
+      const cid = add({dict:`<< /Length ${b.length} >>`, bin:b});
+      return add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${this.W} ${this.H}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> /XObject << ${xo} >> >> /Contents ${cid} 0 R >>`);
+    });
+    objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${kids.length} >>`;
+    const chunks = [], offs = []; let off = 0;
+    const push = b => { chunks.push(b); off += b.length; };
+    push(latin1('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'));
+    objs.forEach((o, i) => {
+      offs.push(off);
+      if(typeof o === 'string') push(latin1(`${i+1} 0 obj\n${o}\nendobj\n`));
+      else { push(latin1(`${i+1} 0 obj\n${o.dict}\nstream\n`)); push(o.bin); push(latin1('\nendstream\nendobj\n')); }
+    });
+    const xref = off;
+    let x = `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+    offs.forEach(o => { x += String(o).padStart(10, '0') + ' 00000 n \n'; });
+    x += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+    push(latin1(x));
+    const out = new Uint8Array(off); let p = 0; chunks.forEach(b => { out.set(b, p); p += b.length; });
+    return out;
+  }
+}
+const C_TXT = [0.106,0.137,0.188], C_MUT = [0.42,0.463,0.525], C_ACC = [0.122,0.435,0.922], C_HEAD = [0.937,0.949,0.973];
+function buildPdf(){
+  const pdf = new PDF(), W = pdf.W, H = pdf.H, M = 40, CW = W - 2*M;
+  let y = H - M;
+  const ensure = need => { if(y - need < M + 24){ pdf.newPage(); y = H - M; return true; } return false; };
+  // intestazione
+  pdf.text(M, y - 18, 'Computo metrico', 20, true, 'left', C_ACC);
+  pdf.text(W - M, y - 16, new Date().toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'}), 10, false, 'right', C_MUT);
+  y -= 40;
+  pdf.text(M, y, fitTxt(D.name, 13, CW, true), 13, true); y -= 15;
+  const fp = folderPath(D.folderId).map(f => f.name).join(' › ');
+  if(fp){ pdf.text(M, y, fitTxt(fp, 9.5, CW), 9.5, false, 'left', C_MUT); y -= 10; }
+  pdf.line(M, y, W - M, y); y -= 16;
+
+  const table = (cols, rows, total) => {
+    const rh = 18, hh = 20;
+    const head = () => { pdf.fillRect(M, y - hh, CW, hh, C_HEAD); let x = M; cols.forEach(c => { pdf.text(c.r ? x + c.w - 5 : x + 5, y - 13.5, c.t, 8.5, true, c.r ? 'right' : 'left', C_MUT); x += c.w; }); y -= hh; };
+    ensure(hh + rh*2); head();
+    rows.forEach(r => {
+      if(ensure(rh)) head();
+      let x = M;
+      cols.forEach((c, j) => { const t = fitTxt(r[j], 9, c.w - 10, j === 0); pdf.text(c.r ? x + c.w - 5 : x + 5, y - 12.5, t, 9, j === 0, c.r ? 'right' : 'left'); x += c.w; });
+      y -= rh; pdf.line(M, y, W - M, y, [0.9,0.92,0.95], 0.6);
+    });
+    if(total){
+      if(ensure(rh + 6)) head();
+      y -= 3; pdf.fillRect(M, y - rh - 2, CW, rh + 2, [0.91,0.94,1]);
+      pdf.text(M + 5, y - 13.5, total[0], 10, true); pdf.text(W - M - 5, y - 13.5, total[1], 10, true, 'right');
+      y -= rh + 2;
+    }
+  };
+
+  if(D.shapes.length){
+    const bh = 320;
+    pdf.fillRect(M, y - bh, CW, bh, [0.985,0.99,1]); pdf.strokeRect(M, y - bh, CW, bh, [0.88,0.9,0.93]);
+    const k = pdfDrawing(pdf, M, y - bh, CW, bh);
+    y -= bh + 12;
+    if(D.scale){
+      const ratio = (D.scale / k) / 0.0352778, pw = Math.pow(10, Math.floor(Math.log10(ratio))), nice = Math.round(ratio / pw * 10) / 10 * pw;
+      pdf.text(M, y, 'Scala del disegno (stampa A4) ~ 1:' + nf(nice, 0) + '  ·  unità: ' + D.unit, 8.5, false, 'left', C_MUT); y -= 18;
+    }
+    pdf.text(M, y - 4, 'Superfici', 13, true); y -= 14;
+    let tot = 0;
+    const rows = D.shapes.map((s, i) => {
+      const a = shapeAreaCm2(s), p = shapePerimCm(s); if(a) tot += a;
+      return [String(i+1), s.name || typeName(s), (s.name ? typeName(s) + ': ' : '') + dimsText(s), p != null ? fmtLen(p, 'm') : '—', a != null ? fmtArea(a, 'm') : (s.closed ? '—' : 'aperta')];
+    });
+    table([{t:'N°', w:28}, {t:'Descrizione', w:140}, {t:'Forma e misure', w:187}, {t:'Perimetro', w:72, r:true}, {t:'Superficie', w:88, r:true}], rows,
+      D.scale ? ['Totale superficie', fmtArea(tot, 'm')] : null);
+    if(!D.scale){ y -= 14; pdf.text(M, y, 'Il disegno non ha ancora misure reali: le superfici non possono essere calcolate.', 9, false, 'left', C_MUT); y -= 6; }
+    y -= 22;
+  }
+  if(D.solids.length){
+    ensure(330);
+    pdf.text(M, y - 4, 'Volumi', 13, true); y -= 14;
+    const img = shot3D(1200, 640);
+    if(img){ const ih = CW * 640/1200; ensure(ih + 10); pdf.image(img, 1200, 640, M, y - ih, CW, ih); pdf.strokeRect(M, y - ih, CW, ih, [0.88,0.9,0.93]); y -= ih + 12; }
+    let tot = 0;
+    const rows = D.solids.map((so, i) => { const v = solidVol(so); if(v != null) tot += v; return [String(i+1), so.name || solidName(so), (so.name ? solidName(so) + ': ' : '') + solidDims(so), v != null ? fmtVol(v) : '—', v != null ? fmtLitri(v) : '—']; });
+    table([{t:'N°', w:28}, {t:'Descrizione', w:140}, {t:'Solido e misure', w:187}, {t:'Volume', w:78, r:true}, {t:'Litri', w:82, r:true}], rows, ['Totale volume', fmtVol(tot) + '  (' + fmtLitri(tot) + ')']);
+  }
+  // piè di pagina
+  pdf.pages.forEach((pg, i) => { pdf.c = pg; pdf.line(M, M - 6, W - M, M - 6, [0.9,0.92,0.95], 0.6); pdf.text(M, M - 20, 'Misure Forme · ' + fitTxt(D.name, 8, 300), 8, false, 'left', C_MUT); pdf.text(W - M, M - 20, 'Pagina ' + (i+1) + ' di ' + pdf.pages.length, 8, false, 'right', C_MUT); });
+  return pdf.build();
+}
+function pdfDrawing(pdf, bx, by, bw, bh){
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  D.shapes.forEach(s => s.pts.forEach(p => { x0=Math.min(x0,p.x); y0=Math.min(y0,p.y); x1=Math.max(x1,p.x); y1=Math.max(y1,p.y); }));
+  const pad = 34, k = Math.min((bw - 2*pad)/Math.max(x1-x0, 1e-12), (bh - 2*pad)/Math.max(y1-y0, 1e-12));
+  const cx = (x0+x1)/2, cy = (y0+y1)/2, P = q => [bx + bw/2 + (q.x - cx)*k, by + bh/2 - (q.y - cy)*k];
+  D.shapes.forEach(s => {
+    let o = '';
+    [s.pts, ...(s.holes||[])].forEach(r => { r.forEach((q, i) => { const [x, y] = P(q); o += `${n2(x)} ${n2(y)} ${i ? 'l' : 'm'}\n`; }); if(s.closed) o += 'h\n'; });
+    pdf.op(`0.9 0.94 1 rg 0.14 0.19 0.26 RG 0.9 w 1 J 1 j\n${o}${s.closed ? 'B*' : 'S'}`);
+  });
+  if(D.scale) D.shapes.forEach(s => {
+    if(isCurved(s)) return;
+    const n = s.pts.length, C = P(s.closed ? centroid(s.pts) : {x:s.pts.reduce((a,p)=>a+p.x,0)/n, y:s.pts.reduce((a,p)=>a+p.y,0)/n});
+    for(let i=0;i<segCount(s);i++){
+      const A = P(s.pts[i]), B = P(s.pts[(i+1)%n]), L = Math.hypot(B[0]-A[0], B[1]-A[1]);
+      if(L < 34) continue;
+      const mid = [(A[0]+B[0])/2, (A[1]+B[1])/2]; let nx = -(B[1]-A[1])/L, ny = (B[0]-A[0])/L;
+      if(nx*(mid[0]-C[0]) + ny*(mid[1]-C[1]) < 0){ nx = -nx; ny = -ny; }
+      pdf.text(mid[0] + nx*10, mid[1] + ny*10 - 2.5, fmtLen(segLenCm(s, i)), 6.5, false, 'center', [0.3,0.35,0.42]);
+    }
+  });
+  D.shapes.forEach((s, i) => {
+    const n = s.pts.length, c = P(s.closed ? centroid(s.pts) : s.pts[Math.floor(n/2)]);
+    pdf.circle(c[0], c[1], 7.5, C_ACC); pdf.text(c[0], c[1] - 3, String(i+1), 8, true, 'center', [1,1,1]);
+    if(isCurved(s) && D.scale) pdf.text(c[0], c[1] - 18, SH[s.geo.t].lab(s.geo.p), 7, false, 'center', [0.2,0.25,0.32]);
+  });
+  return k;
+}
+function shot3D(w, h){
+  const sc = buildScene(D.solids); if(!sc.items.length) return null;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'); x.scale(2, 2);
+  const cm = {yaw:cam.yaw, pitch:cam.pitch, k:1, px:0, py:0}; fitCam(cm, w/2, h/2 + 40, sc); cm.py -= 4;
+  render3D(x, w/2, h/2, cm, {solids:D.solids, sel:null, bg:'#ffffff'});
+  const bin = atob(c.toDataURL('image/jpeg', 0.9).split(',')[1]);
+  const b = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) b[i] = bin.charCodeAt(i);
+  return b;
 }
 
 /* ---- tastiera (PC) ---- */
@@ -976,9 +1927,12 @@ document.addEventListener('keydown', e => {
   if(!D || !$('#modal').classList.contains('hidden')) return;
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); }
   else if(e.key === 'Delete' || e.key === 'Backspace'){ deleteSelected(); }
-  else if(e.key === 'Escape'){ if(draft.length){ draft = []; rubber = null; } else selShape = null; refresh(); }
+  else if(e.key === 'Escape'){ if(draft.length){ draft = []; rubber = null; } else { selShape = null; selSolid = null; } refresh(); }
   else if(e.key === 'Enter' && draft.length){ finishDraft(false); }
-  else if(e.key === 'v') setTool('select'); else if(e.key === 'l') setTool('line'); else if(e.key === 'r') setTool('rect'); else if(e.key === 'f') setTool('free');
+  else if(mode === '2d'){
+    if(e.key === 'v') setTool('select'); else if(e.key === 'l') setTool('line'); else if(e.key === 'f') setTool('free');
+    else if(e.key === 'r'){ opts.shape = 'rect'; saveOpts(); setTool('shape'); } else if(e.key === 's') openShapePicker();
+  }
 });
 
 renderHome();
