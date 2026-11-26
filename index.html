@@ -383,9 +383,8 @@ function paramForm(o){
   const first = o.fields.findIndex(f => f.t !== 'sel');
   if(first >= 0) setTimeout(() => focusEnd($('#pf' + first)), 60);
   if(hasLen) $('#pfU').onchange = e => {
-    const nu = e.target.value;
-    o.fields.forEach((f,i) => { if(f.t !== 'len') return; const el = $('#pf'+i); const v = parseNum(el.value); if(isFinite(v)) el.value = numStr(fromCm(toCm(v, u), nu)); });
-    u = nu; $('#modalBox').querySelectorAll('[data-suf]').forEach(s => s.textContent = u);
+    // i numeri scritti restano quelli (4 cm → 4 m): cambia solo l'unità
+    u = e.target.value; $('#modalBox').querySelectorAll('[data-suf]').forEach(s => s.textContent = u);
   };
   const showErr = m => { const e = $('#pfErr'); e.textContent = m; e.classList.remove('hidden'); };
   $('#pfCancel').onclick = () => { closeModal(); if(o.onCancel) o.onCancel(); };
@@ -845,22 +844,41 @@ function closeEditor(){
 }
 function updateTitle(){ $('#title').innerHTML = esc(D.name) + `<small>${esc(folderPath(D.folderId).map(f=>f.name).join(' › '))} · tocca per rinominare</small>`; }
 function save(){ if(!D) return; D.updated = Date.now(); persist(); }
-function pushHistory(){ history.push(JSON.stringify({shapes:D.shapes, scale:D.scale, solids:D.solids})); if(history.length > 80) history.shift(); }
+function pushHistory(){ history.push(JSON.stringify({shapes:D.shapes, scale:D.scale, solids:D.solids, unit:D.unit})); if(history.length > 80) history.shift(); }
 function undo(){
   if(draft.length){ if(draftFrom && draft.length <= 2) return cancelDraft(); draft.pop(); if(!draft.length) rubber = null; refresh(); return; }
   const h = history.pop(); if(!h) return toast('Niente da annullare');
   const o = JSON.parse(h); D.shapes = o.shapes; D.scale = o.scale; D.solids = o.solids || [];
+  if(o.unit && o.unit !== D.unit){ if(cam && cam.k) cam.k *= UNIT_F[o.unit] / UNIT_F[D.unit]; setUnit(o.unit); }
   if(!D.shapes.find(s => s.id === selShape)) selShape = null;
   if(!D.solids.find(s => s.id === selSolid)) selSolid = null;
   save(); refresh();
 }
 function hasMeasures(){ return D.shapes.some(s => Object.keys(s.measures).length || s.scaled || (s.geo && s.geo.measured)); }
 function setUnit(u){ D.unit = opts.unit = u; $('#unitSel').value = u; saveOpts(); }
+/* Cambio di unità = cambia solo l'etichetta. I numeri restano quelli scritti (4 cm → 4 m)
+   e il disegno sullo schermo resta identico: si moltiplicano per lo stesso fattore la scala
+   del disegno e tutte le misure reali salvate (lati, solidi), mai le coordinate della forma. */
+function changeUnit(u){
+  if(!D || !UNIT_F[u] || u === D.unit) return;
+  const k = UNIT_F[D.unit] / UNIT_F[u];
+  if(D.scale) D.scale *= k;
+  D.shapes.forEach(s => { if(s.measures) Object.keys(s.measures).forEach(i => { s.measures[i] *= k; }); });
+  const scaleSolid = so => {
+    if(so.t === 'group'){ (so.parts || []).forEach(scaleSolid); return; }
+    if(so.pos) so.pos = so.pos.map(v => v * k);
+    const T = SOL[so.t];
+    if(T && so.p) T.ps.forEach(q => { if(q.t === 'len' && so.p[q.k] != null) so.p[q.k] *= k; });
+  };
+  (D.solids || []).forEach(scaleSolid);
+  if(cam && cam.k) cam.k /= k; // vista 3D identica: la scena è k volte più grande, lo zoom k volte più piccolo
+  setUnit(u);
+}
 
 $('#btnBack').onclick = closeEditor;
 $('#title').onclick = async () => { const v = await askText('Nome del disegno', D.name, 'Salva'); if(v){ D.name = v; save(); updateTitle(); } };
-// cambiare unità cambia solo i numeri mostrati: il disegno e la vista restano identici
-$('#unitSel').onchange = e => { setUnit(e.target.value); save(); refresh(); };
+// cambiare unità cambia solo l'etichetta: i numeri (4 cm → 4 m), il disegno e la vista restano identici
+$('#unitSel').onchange = e => { pushHistory(); changeUnit(e.target.value); save(); refresh(); };
 $('#btnPdf').onclick = () => openComputo();
 document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
 function setMode(m, silent){
@@ -1228,15 +1246,15 @@ function openMeasure(shape, i){
     <div class="mrow left">${m != null ? `<button class="btn danger" id="mDel">Rimuovi misura</button>` : '<span></span>'}
       <span style="display:flex;gap:8px"><button class="btn ghost" id="mCancel">Annulla</button><button class="btn primary" id="mOk">Salva</button></span></div>`);
   const inp = $('#mVal'); setTimeout(() => focusEnd(inp), 60);
-  // cambiando unità il numero viene convertito (350 cm → 3,5 m), così la forma non cambia
-  $('#mUnit').onchange = e => { const v = parseNum(inp.value); if(isFinite(v)) inp.value = numStr(fromCm(toCm(v, u), e.target.value)); u = e.target.value; };
+  // cambiando unità il numero NON viene convertito: 4 cm diventa 4 m e tutto il disegno cambia solo etichetta
+  $('#mUnit').onchange = e => { u = e.target.value; };
   $('#mCancel').onclick = closeModal;
   $('#mOk').onclick = () => {
     const v = parseNum(inp.value);
     if(!(v > 0)){ inp.style.borderColor = 'var(--danger)'; inp.focus(); return; }
     const unit = $('#mUnit').value;
-    if(unit !== D.unit) setUnit(unit);
     closeModal(); pushHistory();
+    if(unit !== D.unit) changeUnit(unit);
     const before = drawBox();
     if(shape.geo) toPlain(shape);
     applyMeasure(shape, i, toCm(v, unit)); keepSize(before); save(); refresh();
@@ -1288,7 +1306,8 @@ function openShapeDims(s){
     name: {v:s.name, ph:T.nm},
     delLabel: 'Elimina forma', onDel: () => { selShape = s.id; selSide = null; deleteSelected(); },
     onSave: (vals, ex) => {
-      const np = {...p}; let sc = D.scale; const before = drawBox();
+      // se nel modulo cambi unità, i numeri restano quelli: la scala va letta già nella nuova unità
+      const np = {...p}; let sc = D.scale ? D.scale * UNIT_F[D.unit] / UNIT_F[ex.unit] : D.scale; const before = drawBox();
       const lens = T.ps.filter(q => q.t === 'len');
       const given = lens.filter(q => vals[q.k] != null), others = D.shapes.some(x => x !== s && shapeHasMeasure(x));
       if(given.length === 1){
@@ -1306,9 +1325,9 @@ function openShapeDims(s){
       });
       const err = T.chk && T.chk(np); if(err) return err;
       pushHistory();
+      if(ex.unit !== D.unit) changeUnit(ex.unit);
       D.scale = sc; s.geo.p = np; s.geo.rot = ex.rot || 0; s.name = ex.name || '';
       s.geo.mk = mk; s.geo.measured = anyLen || Object.keys(mk).length > 0;
-      if(ex.unit !== D.unit) setUnit(ex.unit);
       regen(s); keepSize(before); save(); refresh();
       return null;
     }
@@ -2137,8 +2156,8 @@ function openSolidForm(so, isNew){
       for(const q of T.ps){ if(vals[q.k] == null) return 'Scrivi “' + q.n + '”.'; np[q.k] = vals[q.k]; }
       const err = T.chk && T.chk(np); if(err) return err;
       pushHistory();
+      if(ex.unit !== D.unit) changeUnit(ex.unit); // prima del salvataggio: le misure appena scritte sono già nella nuova unità
       so.p = np; so.name = ex.name || ''; if(so.t === 'extrude') so.sid = vals.sid;
-      if(ex.unit !== D.unit) setUnit(ex.unit);
       if(isNew) D.solids.push(so);
       selSolid = so.id; save(); if(isNew) fit3D(); refresh();
       if(isNew) toast('Volume: ' + (solidVol(so) != null ? fmtVol(solidVol(so)) : '—'));
