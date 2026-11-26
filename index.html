@@ -162,6 +162,10 @@ input,select{-webkit-user-select:text;user-select:text}
       <button class="btn sm primary" id="dClose">Chiudi forma</button>
       <button class="btn sm ghost" id="dCancel">✕</button>
     </div>
+    <div id="selBar" class="draft-bar shadow hidden">
+      <button class="btn sm" id="sMerge">🔗 Unisci con un’altra forma</button>
+      <button class="btn sm ghost" id="sMergeX">Annulla</button>
+    </div>
     <div id="result" class="result shadow hidden"></div>
   </div>
   <nav class="tools" id="tools2d">
@@ -368,6 +372,7 @@ function paramForm(o){
     ${fh}
     ${o.rot != null ? `<div class="fld"><label for="pfR">Rotazione</label><div class="in-suf"><input id="pfR" class="inp" inputmode="decimal" autocomplete="off" value="${numStr(o.rot)}"><span class="suf">°</span></div></div>` : ''}
     ${o.name ? `<div class="fld"><label for="pfN">Descrizione (per il computo)</label><input id="pfN" class="inp" maxlength="80" placeholder="${esc(o.name.ph)}" value="${esc(o.name.v||'')}"></div>` : ''}
+    ${o.extra ? `<div class="sheet-actions"><button class="btn" id="pfExtra">${esc(o.extra.label)}</button></div>` : ''}
     <div id="pfErr" class="err hidden"></div>
     <div class="mrow left">${o.onDel ? `<button class="btn danger" id="pfDel">${esc(o.delLabel || 'Elimina')}</button>` : '<span></span>'}
       <span style="display:flex;gap:8px"><button class="btn ghost" id="pfCancel">Annulla</button><button class="btn primary" id="pfOk">${esc(o.okLabel || 'Salva')}</button></span></div>`);
@@ -381,6 +386,7 @@ function paramForm(o){
   const showErr = m => { const e = $('#pfErr'); e.textContent = m; e.classList.remove('hidden'); };
   $('#pfCancel').onclick = () => { closeModal(); if(o.onCancel) o.onCancel(); };
   if(o.onDel) $('#pfDel').onclick = () => { closeModal(); o.onDel(); };
+  if(o.extra) $('#pfExtra').onclick = () => { closeModal(); o.extra.fn(); };
   $('#pfOk').onclick = () => {
     const vals = {};
     for(let i = 0; i < o.fields.length; i++){
@@ -678,8 +684,97 @@ function regen(s){
 }
 function moveShape(s, dx, dy){
   if(s.geo){ s.geo.cx += dx; s.geo.cy += dy; regen(s); }
-  else s.pts.forEach(q => { q.x += dx; q.y += dy; });
+  else [s.pts, ...(s.holes||[])].forEach(r => r.forEach(q => { q.x += dx; q.y += dy; }));
 }
+
+/* ---- UNIONE di due forme che si toccano lungo un lato: il lato in comune sparisce ---- */
+function mergeEps(){ return Math.max(tolPx()/view.z*0.35, 1e-12); }
+function shapeRings(s){
+  const o = s.pts.map(q => ({x:q.x, y:q.y})); if(polyArea(o) < 0) o.reverse();
+  const hs = (s.holes||[]).map(h => { const r = h.map(q => ({x:q.x, y:q.y})); if(polyArea(r) > 0) r.reverse(); return r; });
+  return [o, ...hs];
+}
+/* altra forma chiusa che ha un tratto di lato in comune con il lato i di "shape" */
+function sharedNeighbor(shape, i){
+  if(!shape.closed) return null;
+  const eps = mergeEps(), A = shape.pts[i], B = shape.pts[(i+1) % shape.pts.length], L = dist(A, B);
+  if(!(L > eps)) return null;
+  const ux = (B.x-A.x)/L, uy = (B.y-A.y)/L;
+  const off = p => Math.abs((p.x-A.x)*uy - (p.y-A.y)*ux), t = p => (p.x-A.x)*ux + (p.y-A.y)*uy;
+  for(const s of D.shapes){
+    if(s === shape || !s.closed) continue;
+    for(let j=0;j<s.pts.length;j++){
+      const c = s.pts[j], d = s.pts[(j+1) % s.pts.length];
+      if(off(c) > eps || off(d) > eps) continue;
+      const lo = Math.max(0, Math.min(t(c), t(d))), hi = Math.min(L, Math.max(t(c), t(d)));
+      if(hi - lo > eps*2) return s;
+    }
+  }
+  return null;
+}
+function mergeShapes(a, b){
+  if(!a.closed || !b.closed) return 'Si possono unire solo forme chiuse.';
+  const eps = mergeEps();
+  const RA = shapeRings(a), RB = shapeRings(b), PA = RA.flat();
+  RB.forEach(r => r.forEach(q => { for(const p of PA){ if(dist(p, q) <= eps){ q.x = p.x; q.y = p.y; break; } } }));
+  const PB = RB.flat();
+  const onBound = (p, R) => R.some(r => r.some((v,i) => segDist(p, v, r[(i+1)%r.length]) <= eps));
+  const inside = (p, R) => inPoly(p, R[0]) && !R.slice(1).some(h => inPoly(p, h)) && !onBound(p, R);
+  if(PB.some(p => inside(p, RA)) || PA.some(p => inside(p, RB))) return 'Le due forme si sovrappongono: per unirle devono toccarsi lungo un lato, senza entrare una nell’altra.';
+  const split = (R, others) => R.map(r => {
+    const out = [];
+    r.forEach((p, i) => {
+      const q = r[(i+1)%r.length], dx = q.x-p.x, dy = q.y-p.y, L2 = dx*dx + dy*dy;
+      out.push(p); if(!L2) return;
+      others.map(o => ({o, t:((o.x-p.x)*dx + (o.y-p.y)*dy)/L2}))
+        .filter(x => x.t > 0 && x.t < 1 && segDist(x.o, p, q) <= eps && dist(x.o, p) > eps && dist(x.o, q) > eps)
+        .sort((u,v) => u.t - v.t).forEach(x => out.push({x:x.o.x, y:x.o.y}));
+    });
+    return out;
+  });
+  const key = p => p.x + ',' + p.y, edges = [];
+  [...split(RA, PB), ...split(RB, PA)].forEach(r => r.forEach((p,i) => { const q = r[(i+1)%r.length]; if(key(p) !== key(q)) edges.push({p, q, a:key(p), b:key(q)}); }));
+  const byKey = new Map(); edges.forEach(e => { const k = e.a + '>' + e.b; if(!byKey.has(k)) byKey.set(k, []); byKey.get(k).push(e); });
+  let removed = 0;
+  edges.forEach(e => { if(e.dead) return; const o = (byKey.get(e.b + '>' + e.a) || []).find(x => !x.dead && x !== e); if(o){ e.dead = o.dead = true; removed++; } });
+  if(!removed) return 'Le forme non hanno un lato in comune. Disegna la seconda forma partendo dagli angoli della prima (i punti si agganciano), poi riprova.';
+  const live = edges.filter(e => !e.dead), from = new Map();
+  live.forEach(e => { if(!from.has(e.a)) from.set(e.a, []); from.get(e.a).push(e); });
+  const rings = [];
+  for(const e0 of live){
+    if(e0.used) continue;
+    const ring = []; let e = e0, g = 0;
+    while(e && !e.used && g++ < 1e6){ e.used = true; ring.push({x:e.p.x, y:e.p.y}); e = (from.get(e.b) || []).find(x => !x.used); }
+    if(ring.length >= 3) rings.push(ring);
+  }
+  const simplify = r => {
+    let out = r.slice(), ch = true;
+    while(ch && out.length > 3){
+      ch = false;
+      for(let i=0;i<out.length;i++){
+        const p = out[(i-1+out.length)%out.length], c = out[i], n = out[(i+1)%out.length];
+        const l1 = dist(p,c), l2 = dist(c,n);
+        if(l1 <= 1e-12 || l2 <= 1e-12){ out.splice(i,1); ch = true; break; }
+        const cr = ((c.x-p.x)*(n.y-c.y) - (c.y-p.y)*(n.x-c.x))/(l1*l2), dt = (c.x-p.x)*(n.x-c.x) + (c.y-p.y)*(n.y-c.y);
+        if(Math.abs(cr) < 1e-6 && dt > 0){ out.splice(i,1); ch = true; break; }
+      }
+    }
+    return out;
+  };
+  const rs = rings.map(simplify).filter(r => r.length >= 3);
+  const outers = rs.filter(r => polyArea(r) > 0).sort((u,v) => polyArea(v) - polyArea(u));
+  if(outers.length !== 1) return 'Le forme si toccano solo in un punto: per unirle devono avere un tratto di lato in comune.';
+  const s = {id:uid(), pts:outers[0], holes:rs.filter(r => polyArea(r) < 0), closed:true, measures:{}, scaled:!!D.scale, name:a.name || b.name || ''};
+  pushHistory();
+  const ia = D.shapes.indexOf(a);
+  D.shapes = D.shapes.filter(x => x !== b); D.shapes.splice(D.shapes.indexOf(a), 1, s);
+  if(ia < 0) D.shapes.push(s);
+  selShape = s.id; save(); refresh();
+  toast('Forme unite in una sola ✓' + (D.scale ? ' Area: ' + fmtArea(shapeAreaCm2(s)) : ''));
+  return null;
+}
+function tryMerge(a, b){ const err = mergeShapes(a, b); if(err) actionSheet('Unione non riuscita', [], esc(err)); }
+let mergePick = null;   // id della forma da unire, in attesa del tocco sulla seconda
 function typeName(s){ if(s.geo) return SH[s.geo.t].nm; if(s.kind && SH[s.kind]) return SH[s.kind].nm; return s.closed ? 'Poligono (' + s.pts.length + ' lati)' : 'Linea'; }
 function shapeLabel(s, k){ return (k+1) + '. ' + (s.name || typeName(s)); }
 
@@ -713,6 +808,7 @@ const ZMIN = 1e-12, ZMAX = 1e12; // zoom praticamente illimitato
 let mode = '2d';
 let tool = 'line';
 let draft = [], rubber = null;   // forma in costruzione (strumento Linee)
+let draftFrom = null, draftMeasures = {};   // linea aperta che si sta continuando
 let selShape = null, selSolid = null;
 let history = [];
 let act = null;                  // azione del puntatore in corso
@@ -724,8 +820,8 @@ function openEditor(id){
   D = db.drawings.find(d => d.id === id);
   if(!D.solids) D.solids = [];
   D.shapes.forEach(s => { if(!s.measures) s.measures = {}; if(s.geo) regen(s); });
-  history = []; draft = []; rubber = null; selShape = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
-  cam = {yaw:-0.62, pitch:0.55, k:1, px:0, py:0}; viewIdx = 0;
+  history = []; draft = []; rubber = null; draftFrom = null; draftMeasures = {}; mergePick = null; selShape = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
+  cam = {yaw:-0.38, pitch:0.5, k:1, px:0, py:0}; viewIdx = 0;
   $('#home').classList.add('hidden'); $('#editor').classList.remove('hidden');
   $('#unitSel').value = D.unit;
   updateTitle();
@@ -736,6 +832,7 @@ function openEditor(id){
   syncToggles(); fitView(); fit3D();
 }
 function closeEditor(){
+  if(draft.length) finishDraft(false);
   draft = []; rubber = null; act = null;
   save();
   $('#editor').classList.add('hidden'); $('#home').classList.remove('hidden');
@@ -745,14 +842,14 @@ function updateTitle(){ $('#title').innerHTML = esc(D.name) + `<small>${esc(fold
 function save(){ if(!D) return; D.updated = Date.now(); persist(); }
 function pushHistory(){ history.push(JSON.stringify({shapes:D.shapes, scale:D.scale, solids:D.solids})); if(history.length > 80) history.shift(); }
 function undo(){
-  if(draft.length){ draft.pop(); if(!draft.length) rubber = null; refresh(); return; }
+  if(draft.length){ if(draftFrom && draft.length <= 2) return cancelDraft(); draft.pop(); if(!draft.length) rubber = null; refresh(); return; }
   const h = history.pop(); if(!h) return toast('Niente da annullare');
   const o = JSON.parse(h); D.shapes = o.shapes; D.scale = o.scale; D.solids = o.solids || [];
   if(!D.shapes.find(s => s.id === selShape)) selShape = null;
   if(!D.solids.find(s => s.id === selSolid)) selSolid = null;
   save(); refresh();
 }
-function hasMeasures(){ return D.shapes.some(s => Object.keys(s.measures).length || (s.geo && s.geo.measured)); }
+function hasMeasures(){ return D.shapes.some(s => Object.keys(s.measures).length || s.scaled || (s.geo && s.geo.measured)); }
 function setUnit(u){ D.unit = opts.unit = u; $('#unitSel').value = u; saveOpts(); }
 
 $('#btnBack').onclick = closeEditor;
@@ -797,14 +894,14 @@ const center = () => ({x:cv.clientWidth/2, y:cv.clientHeight/2});
 $('#zIn').onclick  = () => zoomAt(center(), 1.35);
 $('#zOut').onclick = () => zoomAt(center(), 1/1.35);
 $('#zFit').onclick = () => { if(mode === '3d') fit3D(); else fitView(); };
-$('#dUndo').onclick = () => { draft.pop(); if(!draft.length) rubber = null; refresh(); };
+$('#dUndo').onclick = () => { if(draftFrom && draft.length <= 2) return cancelDraft(); draft.pop(); if(!draft.length) rubber = null; refresh(); };
 $('#dEnd').onclick = () => finishDraft(false);
 $('#dClose').onclick = () => finishDraft(true);
-$('#dCancel').onclick = () => { draft = []; rubber = null; refresh(); };
+$('#dCancel').onclick = () => cancelDraft();
 
 async function deleteSelected(){
   if(mode === '3d') return deleteSolid();
-  if(draft.length){ draft = []; rubber = null; return refresh(); }
+  if(draft.length) return cancelDraft();
   if(!selShape) return toast('Seleziona prima una forma (strumento Seleziona)');
   pushHistory();
   D.shapes = D.shapes.filter(s => s.id !== selShape); selShape = null;
@@ -812,15 +909,37 @@ async function deleteSelected(){
   save(); refresh(); toast('Forma eliminata · premi Annulla per recuperarla');
 }
 
+const samePt = (a, b) => dist(a, b) <= tolPx()/view.z*0.5;
+const openLines = () => D.shapes.filter(s => !s.closed && !s.geo);
+function remapMeasures(m, n, rev, off){ const o = {}; for(const k in m){ const i = +k; o[(rev ? n-2-i : i) + off] = m[k]; } return o; }
+function cancelDraft(){
+  if(draftFrom){ D.shapes.splice(Math.min(draftFrom.idx, D.shapes.length), 0, draftFrom.shape); history.pop(); }
+  draft = []; rubber = null; draftFrom = null; draftMeasures = {}; refresh();
+}
 function finishDraft(close){
   if(close && draft.length < 3) close = false;
-  if(draft.length >= 2){
-    pushHistory();
-    const s = {id:uid(), pts:draft.map(p => ({x:p.x, y:p.y})), closed:close, measures:{}};
-    D.shapes.push(s); selShape = s.id; save();
-    toast(close ? 'Forma chiusa ✓ Tocca un lato per inserire la misura' : 'Linea creata ✓ Tocca un lato per la misura');
+  if(draft.length < 2){ if(draftFrom) return cancelDraft(); draft = []; rubber = null; return refresh(); }
+  if(!draftFrom) pushHistory();
+  let pts = draft.map(p => ({x:p.x, y:p.y})), meas = {...draftMeasures};
+  for(const k in meas) if(+k >= pts.length - 1) delete meas[k];
+  let joined = false;
+  if(!close){
+    // se la linea finisce dove inizia/finisce un'altra linea aperta, diventano una sola
+    const last = pts[pts.length-1], s2 = openLines().find(s => samePt(s.pts[0], last) || samePt(s.pts[s.pts.length-1], last));
+    if(s2){
+      const fwd = samePt(s2.pts[0], last), sp = fwd ? s2.pts : s2.pts.slice().reverse();
+      Object.assign(meas, remapMeasures(s2.measures, s2.pts.length, !fwd, pts.length - 1));
+      pts = pts.concat(sp.slice(1).map(q => ({x:q.x, y:q.y})));
+      D.shapes = D.shapes.filter(x => x !== s2); joined = true;
+    }
+    if(pts.length >= 4 && samePt(pts[0], pts[pts.length-1])){ pts.pop(); close = true; }
   }
-  draft = []; rubber = null; refresh();
+  const old = draftFrom && draftFrom.shape;
+  const s = {id: old ? old.id : uid(), pts, closed:close, measures:meas, name: old ? old.name || '' : ''};
+  if(old) D.shapes.splice(Math.min(draftFrom.idx, D.shapes.length), 0, s); else D.shapes.push(s);
+  selShape = s.id; save();
+  toast(close ? 'Forma chiusa ✓ Tocca un lato per inserire la misura' : joined || old ? 'Linea collegata ✓ È un’unica linea' : 'Linea creata ✓ Tocca un lato per la misura');
+  draft = []; rubber = null; draftFrom = null; draftMeasures = {}; refresh();
 }
 function commitShape(pts, closed){
   pushHistory();
@@ -971,12 +1090,12 @@ function hitShape(sp){
   for(let k=D.shapes.length-1;k>=0;k--){ const s = D.shapes[k]; if(s.closed && inPoly(w, s.pts) && !(s.holes||[]).some(h => inPoly(w, h))) return s; }
   return null;
 }
-function openShapeOrSide(shape, i){ if(shape.geo) openShapeDims(shape); else openMeasure(shape, i); }
+function openShapeOrSide(shape, i){ if(shape.geo) openShapeDims(shape, i); else openMeasure(shape, i); }
 
 /* ---- MISURA di un lato ---- */
 function openMeasure(shape, i){
   selShape = shape.id; draw();
-  const cur = segLenCm(shape, i), m = shape.measures[i];
+  const cur = segLenCm(shape, i), m = shape.measures[i], nb = sharedNeighbor(shape, i);
   let u = D.unit;
   const val = m != null ? fromCm(m,u) : (cur != null ? fromCm(cur,u) : '');
   const valStr = val === '' ? '' : numStr(val);
@@ -986,9 +1105,11 @@ function openMeasure(shape, i){
   openModal(`<h3>Misura del lato</h3><p>${desc}</p>
     <div class="in-row"><input id="mVal" class="inp" inputmode="decimal" autocomplete="off" placeholder="es. 3,50" value="${valStr}">
     <select id="mUnit">${UNITS.map(x => `<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></div>
+    ${nb ? `<div class="sheet-actions"><button class="btn" id="mMerge">✂️ Elimina questa linea e unisci le due forme</button></div>` : ''}
     <div class="mrow left">${m != null ? `<button class="btn danger" id="mDel">Rimuovi misura</button>` : '<span></span>'}
       <span style="display:flex;gap:8px"><button class="btn ghost" id="mCancel">Annulla</button><button class="btn primary" id="mOk">Salva</button></span></div>`);
-  const inp = $('#mVal'); setTimeout(() => { inp.focus(); inp.select(); }, 60);
+  const inp = $('#mVal'); if(!nb) setTimeout(() => { inp.focus(); inp.select(); }, 60);
+  if(nb) $('#mMerge').onclick = () => { closeModal(); tryMerge(shape, nb); };
   // cambiando unità il numero viene convertito (350 cm → 3,5 m), così la forma non cambia
   $('#mUnit').onchange = e => { const v = parseNum(inp.value); if(isFinite(v)) inp.value = numStr(fromCm(toCm(v, u), e.target.value)); u = e.target.value; };
   $('#mCancel').onclick = closeModal;
@@ -1022,10 +1143,11 @@ function applyMeasure(shape, i, cm){
   shape.measures[i] = cm;
 }
 /* ---- MISURE di una forma parametrica (cerchio, triangolo, ...) ---- */
-function openShapeDims(s){
+function openShapeDims(s, edge){
   selShape = s.id; draw();
-  const T = SH[s.geo.t], p = s.geo.p;
+  const T = SH[s.geo.t], p = s.geo.p, nb = edge != null ? sharedNeighbor(s, edge) : null;
   paramForm({
+    extra: nb ? {label:'✂️ Elimina questa linea e unisci le due forme', fn: () => tryMerge(s, nb)} : null,
     title: 'Misure: ' + T.nm,
     desc: D.scale ? 'Scrivi le misure reali: la forma si adatta.' : 'Prima misura del disegno: fissa la scala. Puoi scriverne anche una sola, le altre restano in proporzione.',
     fields: T.ps.map(q => ({k:q.k, n:q.n, t:q.t, v: q.t === 'len' ? (D.scale ? p[q.k]*D.scale : null) : p[q.k]})),
@@ -1099,7 +1221,8 @@ function toast(m){ toastMsg = m; clearTimeout(toastT); updateHint(); toastT = se
 function updateHint(){
   let h = toastMsg;
   if(!h){
-    if(mode === '3d') h = D && D.solids.length ? 'Trascina per ruotare · 2 dita o rotella: zoom · tocca un solido, ritoccalo per le misure' : 'Aggiungi un solido o estrudi una forma del disegno 2D';
+    if(mergePick && mode === '2d') h = 'Tocca la forma da unire: il lato in comune verrà eliminato';
+    else if(mode === '3d') h = D && D.solids.length ? 'Trascina per ruotare · 2 dita o rotella: zoom · tocca un solido, ritoccalo per le misure' : 'Aggiungi un solido o estrudi una forma del disegno 2D';
     else if(tool === 'line') h = draft.length ? (draft.length >= 3 ? 'Tocca il 1° punto per chiudere · tocca l’ultimo per terminare' : 'Tocca o trascina per aggiungere il prossimo punto')
                                         : 'Tocca per mettere i punti o trascina per tracciare una linea · tocca un lato per la misura';
     else if(tool === 'shape') h = SH[opts.shape].nm + ': trascina per disegnarla · tocca “Forme” per cambiarla';
@@ -1108,7 +1231,15 @@ function updateHint(){
   }
   $('#hint').textContent = h;
 }
+$('#sMerge').onclick = () => { if(mergePick) return; mergePick = selShape; refresh(); };
+$('#sMergeX').onclick = () => { mergePick = null; refresh(); };
 function refresh(){
+  if(mergePick && (!D || mode !== '2d' || tool !== 'select' || !D.shapes.find(s => s.id === mergePick))) mergePick = null;
+  const selS = D && D.shapes.find(s => s.id === selShape);
+  const showSel = !!D && mode === '2d' && tool === 'select' && !resultKind && ((selS && selS.closed && D.shapes.filter(s => s.closed).length > 1) || mergePick);
+  $('#selBar').classList.toggle('hidden', !showSel);
+  $('#sMerge').textContent = mergePick ? '👆 Tocca la forma da unire' : '🔗 Unisci con un’altra forma';
+  $('#sMergeX').classList.toggle('hidden', !mergePick);
   $('#draftBar').classList.toggle('hidden', !(mode === '2d' && tool === 'line' && draft.length));
   $('#dClose').classList.toggle('hidden', draft.length < 3);
   $('#dEnd').classList.toggle('hidden', draft.length < 2);
@@ -1275,7 +1406,7 @@ cv.addEventListener('pointerdown', e => {
   const p = sp(e); pointers.set(e.pointerId, p);
   if(pointers.size === 2){
     // inizia pinch/pan con due dita: annulla l'azione singola
-    if(act && act.type === 'line' && act.startedNow) draft = [];
+    if(act && act.type === 'line' && act.startedNow){ if(draftFrom) cancelDraft(); else draft = []; }
     act = null; act3 = null; rubber = draft.length ? rubber : null;
     const [a, b] = [...pointers.values()];
     gesture = {mid:{x:(a.x+b.x)/2, y:(a.y+b.y)/2}, d: Math.max(dist(a,b), 1), view:{...view}, cam:{...cam}};
@@ -1327,7 +1458,20 @@ function onDown(p){
   if(tool === 'line'){
     const from = draft.length ? draft[draft.length-1] : null;
     let startedNow = false;
-    if(!draft.length){ draft = [snapPoint(w, null)]; startedNow = true; rubber = null; }
+    if(!draft.length){
+      const p0 = snapPoint(w, null), s = openLines().find(s => samePt(s.pts[s.pts.length-1], p0) || samePt(s.pts[0], p0));
+      startedNow = true; rubber = null;
+      if(s){
+        // si riparte dalla fine (o dall'inizio) di una linea lasciata aperta: la si continua
+        const atEnd = samePt(s.pts[s.pts.length-1], p0);
+        pushHistory();
+        draftFrom = {shape:s, idx:D.shapes.indexOf(s)};
+        draft = (atEnd ? s.pts : s.pts.slice().reverse()).map(q => ({x:q.x, y:q.y}));
+        draftMeasures = remapMeasures(s.measures, s.pts.length, !atEnd, 0);
+        D.shapes = D.shapes.filter(x => x !== s);
+        toast('Continui la linea · tocca il primo punto per chiudere la forma');
+      } else { draft = [p0]; draftFrom = null; draftMeasures = {}; }
+    }
     else rubber = snapPoint(w, from);
     act = {type:'line', down:p, moved:false, startedNow};
   } else if(tool === 'shape'){
@@ -1336,6 +1480,7 @@ function onDown(p){
   } else if(tool === 'free'){
     act = {type:'free', down:p, moved:false, pts:[w]};
   } else {
+    if(mergePick){ act = {type:'mergepick', down:p, moved:false}; return; }
     const hv = hitVertex(p);
     if(hv){ selShape = hv.shape.id; act = {type:'vertex', down:p, moved:false, shape:hv.shape, idx:hv.idx}; return; }
     const hs = hitSegment(p);
@@ -1375,7 +1520,7 @@ function onUp(p){
   switch(a.type){
     case 'line': {
       if(!a.moved && a.startedNow){
-        if(tapSegment()){ draft = []; rubber = null; }
+        if(!draftFrom && tapSegment()){ draft = []; rubber = null; }
         break;
       }
       const last = draft[draft.length-1], first = draft[0];
@@ -1414,17 +1559,25 @@ function onUp(p){
     case 'seg': if(!a.moved) openShapeOrSide(a.shape, a.idx); else save(); break;
     case 'move': if(a.moved) save(); else if(a.shape.geo) openShapeDims(a.shape); break;
     case 'vertex': if(a.moved) save(); break;
+    case 'mergepick': {
+      if(a.moved) break;
+      const t = hitShape(p) || (hitSegment(p) || {}).shape, src = D.shapes.find(s => s.id === mergePick);
+      if(!t || t.id === mergePick){ toast('Tocca un’altra forma chiusa'); break; }
+      mergePick = null;
+      if(src) tryMerge(src, t);
+      break;
+    }
   }
 }
 
 /* =================== 3D: SOLIDI E VOLUMI =================== */
-let cam = {yaw:-0.62, pitch:0.55, k:1, px:0, py:0}, act3 = null, viewIdx = 0, lastFaces = [];
-const VIEWS = [{yaw:-0.62, pitch:0.55, n:'Prospettiva'}, {yaw:0, pitch:0, n:'Di fronte'}, {yaw:-Math.PI/2, pitch:0, n:'Di lato'}, {yaw:0, pitch:Math.PI/2, n:'Dall’alto'}];
+let cam = {yaw:-0.38, pitch:0.5, k:1, px:0, py:0}, act3 = null, viewIdx = 0, lastFaces = [];
+const VIEWS = [{yaw:-0.38, pitch:0.5, n:'Prospettiva'}, {yaw:0, pitch:0, n:'Di fronte'}, {yaw:-Math.PI/2, pitch:0, n:'Di lato'}, {yaw:0, pitch:Math.PI/2, n:'Dall’alto'}];
 const PALETTE = [[91,141,239],[245,158,11],[16,185,129],[239,68,68],[139,92,246],[6,182,212],[236,72,153],[132,204,22]];
 
 /* mesh: lista di facce {p:[[x,y,z]...], h:[anelli fori], e:true se disegnare gli spigoli}; normali verso l'esterno */
 function dedupe(p){ const o = []; p.forEach(q => { const l = o[o.length-1]; if(!l || Math.hypot(l[0]-q[0], l[1]-q[1], l[2]-q[2]) > 1e-9) o.push(q); }); if(o.length > 1){ const a = o[0], b = o[o.length-1]; if(Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]) <= 1e-9) o.pop(); } return o; }
-function revolve(prof, N = 40, sx = 1, sy = 1){
+function revolve(prof, N = 64, sx = 1, sy = 1){
   const F = [];
   for(let j=0;j<prof.length-1;j++){
     const [r1,z1] = prof[j], [r2,z2] = prof[j+1];
@@ -1453,7 +1606,7 @@ function orientOut(F){ // per solidi convessi: gira le facce verso l'esterno
   return F;
 }
 const rectRing = (l, w) => [[-l/2,-w/2],[l/2,-w/2],[l/2,w/2],[-l/2,w/2]];
-function sphereProf(r, n = 20){ const o = []; for(let i=0;i<=n;i++){ const a = -Math.PI/2 + Math.PI*i/n; o.push([r*Math.cos(a), r + r*Math.sin(a)]); } o[0][0] = 0; o[n][0] = 0; return o; }
+function sphereProf(r, n = 30){ const o = []; for(let i=0;i<=n;i++){ const a = -Math.PI/2 + Math.PI*i/n; o.push([r*Math.cos(a), r + r*Math.sin(a)]); } o[0][0] = 0; o[n][0] = 0; return o; }
 const SOL = {
   box:{nm:'Parallelepipedo', ps:[Lp('l','Lunghezza'), Lp('w','Larghezza'), Lp('h','Altezza')], def:{l:300, w:200, h:150},
     vol:p => p.l*p.w*p.h, mesh:p => prism(rectRing(p.l, p.w), p.h)},
@@ -1467,15 +1620,15 @@ const SOL = {
     vol:p => Math.PI*p.d*p.d*p.h/12, mesh:p => revolve([[0,0],[p.d/2,0],[0,p.h]])},
   frustum:{nm:'Tronco di cono', ps:[Lp('D','Diametro inferiore'), Lp('d','Diametro superiore'), Lp('h','Altezza')], def:{D:120, d:70, h:100},
     vol:p => Math.PI*p.h*(p.D*p.D + p.D*p.d + p.d*p.d)/12, mesh:p => revolve([[0,0],[p.D/2,0],[p.d/2,p.h],[0,p.h]])},
-  sphere:{nm:'Sfera', ps:[Lp('d','Diametro')], def:{d:100}, vol:p => Math.PI*p.d**3/6, mesh:p => revolve(sphereProf(p.d/2), 36)},
+  sphere:{nm:'Sfera', ps:[Lp('d','Diametro')], def:{d:100}, vol:p => Math.PI*p.d**3/6, mesh:p => revolve(sphereProf(p.d/2), 64)},
   hemi:{nm:'Semisfera', ps:[Lp('d','Diametro')], def:{d:120},
-    vol:p => Math.PI*p.d**3/12, mesh:p => { const r = p.d/2, pr = [[0,0]]; for(let i=0;i<=12;i++){ const a = Math.PI/2*i/12; pr.push([r*Math.cos(a), r*Math.sin(a)]); } pr[pr.length-1][0] = 0; return revolve(pr, 36); }},
+    vol:p => Math.PI*p.d**3/12, mesh:p => { const r = p.d/2, pr = [[0,0]]; for(let i=0;i<=16;i++){ const a = Math.PI/2*i/16; pr.push([r*Math.cos(a), r*Math.sin(a)]); } pr[pr.length-1][0] = 0; return revolve(pr, 64); }},
   cap:{nm:'Calotta sferica', ps:[Lp('d','Diametro di base'), Lp('h','Altezza')], def:{d:150, h:40},
     vol:p => Math.PI*p.h*(3*(p.d/2)**2 + p.h*p.h)/6,
     mesh:p => { const a = p.d/2, R = (a*a + p.h*p.h)/(2*p.h), zc = p.h - R, t0 = Math.atan2(-zc, a), pr = [[0,0]];
-      for(let i=0;i<=12;i++){ const t = t0 + (Math.PI/2 - t0)*i/12; pr.push([R*Math.cos(t), zc + R*Math.sin(t)]); } pr[pr.length-1][0] = 0; return revolve(pr, 36); }},
+      for(let i=0;i<=12;i++){ const t = t0 + (Math.PI/2 - t0)*i/12; pr.push([R*Math.cos(t), zc + R*Math.sin(t)]); } pr[pr.length-1][0] = 0; return revolve(pr, 64); }},
   ellipsoid:{nm:'Ellissoide', ps:[Lp('a','Lunghezza'), Lp('b','Larghezza'), Lp('c','Altezza')], def:{a:160, b:100, c:80},
-    vol:p => Math.PI*p.a*p.b*p.c/6, mesh:p => revolve(sphereProf(p.c/2), 36, p.a/p.c, p.b/p.c)},
+    vol:p => Math.PI*p.a*p.b*p.c/6, mesh:p => revolve(sphereProf(p.c/2), 64, p.a/p.c, p.b/p.c)},
   pyramid:{nm:'Piramide', ps:[Lp('l','Lunghezza base'), Lp('w','Larghezza base'), Lp('h','Altezza')], def:{l:120, w:120, h:110},
     vol:p => p.l*p.w*p.h/3, mesh:p => { const b = rectRing(p.l, p.w).map(q => [q[0], q[1], 0]), t = [0,0,p.h];
       return orientOut([{p:b.slice(), e:true}, ...b.map((q,i) => ({p:[q, b[(i+1)%4], t], e:true}))]); }},
@@ -1491,7 +1644,7 @@ const SOL = {
   torus:{nm:'Toro (ciambella)', ps:[Lp('D','Diametro esterno'), Lp('d','Diametro della sezione')], def:{D:160, d:50},
     chk:p => p.D <= 2*p.d ? 'Il diametro esterno deve essere più del doppio della sezione.' : null,
     vol:p => { const R = (p.D - p.d)/2, r = p.d/2; return 2*Math.PI*Math.PI*R*r*r; },
-    mesh:p => { const R = (p.D - p.d)/2, r = p.d/2, pr = []; for(let i=0;i<=24;i++){ const t = -Math.PI/2 + TAU*i/24; pr.push([R + r*Math.cos(t), r + r*Math.sin(t)]); } return revolve(pr, 40); }},
+    mesh:p => { const R = (p.D - p.d)/2, r = p.d/2, pr = []; for(let i=0;i<=32;i++){ const t = -Math.PI/2 + TAU*i/32; pr.push([R + r*Math.cos(t), r + r*Math.sin(t)]); } return revolve(pr, 64); }},
   extrude:{nm:'Forma 2D estrusa', ps:[Lp('h','Altezza / spessore')]},
 };
 const SOL_ORDER = ['box','cube','cyl','tube','cone','frustum','sphere','hemi','cap','ellipsoid','pyramid','pyrFr','triPrism','hexPrism','torus'];
@@ -1528,7 +1681,7 @@ function buildScene(solids){
   });
   if(!items.length) return {items, T:[0,0,0], size:1};
   const maxD = Math.max(...items.map(it => Math.max(it.b[3]-it.b[0], it.b[4]-it.b[1], it.b[5]-it.b[2])));
-  const gap = maxD * 0.3;
+  const gap = maxD * 0.55;
   let x = 0, zmax = 0;
   items.forEach(it => { it.dx = x - it.b[0]; it.dy = -(it.b[1] + it.b[4])/2; x += it.b[3] - it.b[0] + gap; zmax = Math.max(zmax, it.b[5]); });
   const tw = x - gap;
@@ -1541,16 +1694,21 @@ function buildScene(solids){
   const yspan = Math.max(...items.map(it => it.b[4] - it.b[1]));
   return {items, T:[0, 0, zmax/2], size:Math.max(tw, yspan, zmax), tw, yspan};
 }
-function mkProj(W, H, c, T){
+/* proiezione in prospettiva: la camera sta a distanza Dc dal centro della scena,
+   così gli spigoli paralleli convergono come a occhio nudo (un cubo sembra un cubo) */
+function mkProj(W, H, c, sc){
+  const T = sc.T, Dc = sc.size * 2.6;
   const cy = Math.cos(c.yaw), sy = Math.sin(c.yaw), cp = Math.cos(c.pitch), sp = Math.sin(c.pitch);
-  const f = q => { const x = q[0]-T[0], y = q[1]-T[1], z = q[2]-T[2]; const X = x*cy - y*sy, Yd = x*sy + y*cy;
-    const U = Yd*sp + z*cp; return {x: W/2 + c.px + X*c.k, y: H/2 + c.py - U*c.k, d: Yd*cp - z*sp, X, U}; };
+  const f = q => { const x = q[0]-T[0], y = q[1]-T[1], z = q[2]-T[2]; const X0 = x*cy - y*sy, Yd = x*sy + y*cy;
+    const U0 = Yd*sp + z*cp, d = Yd*cp - z*sp, s = Dc / Math.max(Dc + d, Dc*0.05), X = X0*s, U = U0*s;
+    return {x: W/2 + c.px + X*c.k, y: H/2 + c.py - U*c.k, d, X, U, X0, U0, r: Math.hypot(X0, U0, d + Dc)}; };
   f.n = n => { const X = n[0]*cy - n[1]*sy, Yd = n[0]*sy + n[1]*cy; return [X, Yd*sp + n[2]*cp, Yd*cp - n[2]*sp]; };
+  f.Dc = Dc;
   return f;
 }
 function fitCam(c, W, H, sc){
   if(!sc.items.length){ c.k = 1; c.px = 0; c.py = 0; return; }
-  const f = mkProj(W, H, {...c, k:1, px:0, py:0}, sc.T);
+  const f = mkProj(W, H, {...c, k:1, px:0, py:0}, sc);
   let x0=Infinity,x1=-Infinity,u0=Infinity,u1=-Infinity;
   sc.items.forEach(it => it.F.forEach(fc => fc.p.forEach(q => { const r = f(q); x0=Math.min(x0,r.X); x1=Math.max(x1,r.X); u0=Math.min(u0,r.U); u1=Math.max(u1,r.U); })));
   c.k = clamp(Math.min((W - 70)/Math.max(x1-x0, 1e-9), (H - 150)/Math.max(u1-u0, 1e-9)), ZMIN, ZMAX);
@@ -1567,7 +1725,7 @@ function render3D(c, W, H, cm, o){
   const sc = buildScene(o.solids);
   c.fillStyle = o.bg || '#fbfcfe'; c.fillRect(0, 0, W, H);
   if(!sc.items.length) return [];
-  const P = mkProj(W, H, cm, sc.T);
+  const P = mkProj(W, H, cm, sc);
   if(o.grid !== false){
     const step = niceStep(sc.size/6), ex = step*2;
     const xa = Math.floor((-sc.tw/2 - ex)/step)*step, xb = Math.ceil((sc.tw/2 + ex)/step)*step, ya = Math.floor((-sc.yspan/2 - ex)/step)*step, yb = Math.ceil((sc.yspan/2 + ex)/step)*step;
@@ -1577,29 +1735,51 @@ function render3D(c, W, H, cm, o){
     for(let y = ya; y <= yb + 1e-9; y += step){ const a = P([xa, y, 0]), b = P([xb, y, 0]); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); }
     c.stroke();
   }
-  const L = [-0.35, 0.75, -0.56], faces = [];
+  const L1 = [-0.42, 0.72, -0.55], L2 = [0.6, 0.2, -0.77], faces = [];
   sc.items.forEach(it => it.F.forEach(f => {
-    const nv = P.n(f.n); if(nv[2] > 1e-6) return;           // faccia girata dall'altra parte
-    const pr = f.p.map(P); const d = pr.reduce((a,q) => a + q.d, 0)/pr.length;
-    faces.push({it, f, pr, hr: f.h ? f.h.map(r => r.map(P)) : null, d, I: Math.max(0, nv[0]*L[0] + nv[1]*L[1] + nv[2]*L[2])});
+    const nv = P.n(f.n), pr = f.p.map(P), m = pr.length;
+    const cx = pr.reduce((a,q) => a + q.X0, 0)/m, cu = pr.reduce((a,q) => a + q.U0, 0)/m, cd = pr.reduce((a,q) => a + q.d, 0)/m;
+    if(nv[0]*cx + nv[1]*cu + nv[2]*(cd + P.Dc) >= 0) return;   // faccia girata dall'altra parte
+    const I1 = Math.max(0, nv[0]*L1[0] + nv[1]*L1[1] + nv[2]*L1[2]), I2 = Math.max(0, nv[0]*L2[0] + nv[1]*L2[1] + nv[2]*L2[2]);
+    faces.push({it, f, pr, hr: f.h ? f.h.map(r => r.map(P)) : null, d: Math.hypot(cx, cu, cd + P.Dc), I: Math.min(1, I1*0.8 + I2*0.3)});
   }));
   faces.sort((a,b) => b.d - a.d);
   faces.forEach(fc => {
     const sel = fc.it.so.id === o.sel, base = sel ? [31,111,235] : PALETTE[fc.it.idx % PALETTE.length];
-    const k = 0.5 + 0.5*fc.I, col = base.map(v => Math.round(v*k + 255*(1-k)*0.25));
+    const k = 0.42 + 0.58*fc.I, col = base.map(v => Math.round(v*k + 255*(1-k)*0.22));
     c.beginPath();
     [fc.pr, ...(fc.hr || [])].forEach(r => { r.forEach((q,i) => i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y)); c.closePath(); });
     c.fillStyle = `rgb(${col})`; c.fill('evenodd');
     c.lineJoin = 'round';
     if(fc.f.e){ c.strokeStyle = sel ? '#0b3d91' : 'rgba(20,30,50,.55)'; c.lineWidth = 1; }
-    else { c.strokeStyle = `rgb(${col})`; c.lineWidth = 0.8; }
+    else { c.strokeStyle = `rgb(${col})`; c.lineWidth = 0.5; }
     c.stroke();
   });
+  if(o.sel && o.dims !== false){ const it = sc.items.find(i => i.so.id === o.sel); if(it) drawDims3D(c, P, it, sc); }
   if(o.labels !== false) sc.items.forEach(it => {
     const t = P(it.top), v = solidVol(it.so);
     pill((it.idx + 1) + (v != null ? ' · ' + fmtVol(v) : ''), t.x, t.y - 18, 0, it.so.id === o.sel ? '#fff' : '#1b2330', it.so.id === o.sel ? '#1f6feb' : null, true, c);
   });
   return faces;
+}
+/* quote (lunghezza, larghezza, altezza) del solido selezionato, sugli spigoli verso chi guarda */
+function drawDims3D(c, P, it, sc){
+  const x0 = it.b[0] + it.dx, x1 = it.b[3] + it.dx, y0 = it.b[1] + it.dy, y1 = it.b[4] + it.dy, z0 = it.b[2], z1 = it.b[5];
+  const off = Math.max(x1-x0, y1-y0, z1-z0) * 0.14, xm = (x0+x1)/2, ym = (y0+y1)/2, C = P([xm, ym, (z0+z1)/2]);
+  const yf = P([xm, y0, z0]).r < P([xm, y1, z0]).r ? y0 : y1, sy = yf === y0 ? -1 : 1;
+  const xf = P([x0, ym, z0]).r < P([x1, ym, z0]).r ? x0 : x1, sx = xf === x0 ? -1 : 1;
+  const line = (a, b, txt) => {
+    const A = P(a), B = P(b);
+    c.save(); c.strokeStyle = '#1f6feb'; c.fillStyle = '#1f6feb'; c.lineWidth = 1.4;
+    c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.stroke();
+    [A, B].forEach(p => { c.beginPath(); c.arc(p.x, p.y, 2.8, 0, TAU); c.fill(); });
+    c.restore();
+    const mx = (A.x+B.x)/2, my = (A.y+B.y)/2, vx = mx - C.x, vy = my - C.y, vl = Math.hypot(vx, vy) || 1;
+    pill(txt, mx + vx/vl*22, my + vy/vl*16, 0, '#1f6feb', null, true, c);
+  };
+  line([x0, yf + sy*off, z0], [x1, yf + sy*off, z0], fmtLen(x1 - x0));
+  line([xf + sx*off, y0, z0], [xf + sx*off, y1, z0], fmtLen(y1 - y0));
+  line([xf + sx*off, yf + sy*off, z0], [xf + sx*off, yf + sy*off, z1], fmtLen(z1 - z0));
 }
 function draw3D(){
   const W = cv.clientWidth, H = cv.clientHeight;
@@ -1927,7 +2107,7 @@ document.addEventListener('keydown', e => {
   if(!D || !$('#modal').classList.contains('hidden')) return;
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); }
   else if(e.key === 'Delete' || e.key === 'Backspace'){ deleteSelected(); }
-  else if(e.key === 'Escape'){ if(draft.length){ draft = []; rubber = null; } else { selShape = null; selSolid = null; } refresh(); }
+  else if(e.key === 'Escape'){ if(draft.length) return cancelDraft(); selShape = null; selSolid = null; mergePick = null; refresh(); }
   else if(e.key === 'Enter' && draft.length){ finishDraft(false); }
   else if(mode === '2d'){
     if(e.key === 'v') setTool('select'); else if(e.key === 'l') setTool('line'); else if(e.key === 'f') setTool('free');

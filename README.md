@@ -9,6 +9,8 @@ App web per disegnare forme col dito (o col mouse), inserire le misure e calcola
 - **Cartelle e sottocartelle** per organizzare i disegni (rinomina, elimina, duplica).
 - **Strumenti 2D:** linee, mano libera e **Forme**: rettangolo, quadrato, cerchio, ellisse, ovale, semicerchio, quarto di cerchio, settore, segmento circolare, semiluna, corona circolare, mezza corona, triangoli (3 lati, equilatero, isoscele, rettangolo), trapezi, parallelogramma, rombo, pentagono, esagono, ottagono, poligono regolare, stella, forme a L, T e U.
 - **Misure:** tocca un lato (o una forma) e scrivi la misura in mm, cm, m o km. Cambiare unità converte solo i numeri: il disegno resta identico.
+- **Forme composte:** se due forme si toccano lungo un lato, tocca quel lato e scegli “Elimina questa linea e unisci” (oppure seleziona una forma → “Unisci con un’altra forma”): diventano un’unica forma con la sua area.
+- **Linee riprese:** ripartendo dall’estremo di una linea aperta la si continua; collegando i due estremi la forma si chiude.
 - **Zoom illimitato** con due dita, rotella o pulsanti.
 - **3D:** solidi (parallelepipedo, cubo, cilindro, tubo, cono, tronco di cono, sfera, semisfera, calotta, ellissoide, piramide, tronco di piramide, prismi, toro) ed **estrusione** di una forma del disegno 2D. Volume in m³ e litri.
 - **Computo metrico PDF:** descrizione per ogni voce, disegno in scala, tabella di superfici e volumi con i totali.
