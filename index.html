@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#1f6feb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache">
 <title>Misure Forme</title>
 <style>
 /* Tema unico chiaro (foglio tecnico) — scelta voluta */
@@ -109,7 +110,7 @@ input,select{-webkit-user-select:text;user-select:text}
 .err{background:#fdecec;color:var(--danger);border-radius:10px;padding:8px 11px;font-size:14px;margin-top:4px}
 .pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:6px}
 .pick{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt);text-align:center;line-height:1.2}
-.pick svg,.pick img{width:60px;height:44px;display:block}
+.pick svg,.pick img{width:76px;height:56px;display:block;border-radius:8px;background:#fff}
 .pick.on{border-color:var(--acc);background:var(--acc-soft)}
 .pick:active{transform:scale(.97)}
 .cm-list{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
@@ -180,13 +181,14 @@ input,select{-webkit-user-select:text;user-select:text}
     <button class="tool toggle" id="tGrid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4zM9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16"/></svg>Griglia</button>
     <button class="tool danger" id="tDel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Elimina</button>
   </nav>
-  <nav class="tools t4 hidden" id="tools3d">
+  <nav class="tools hidden" id="tools3d">
     <button class="tool" id="s3Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>Aggiungi solido</button>
     <button class="tool" id="s3Ext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17h10l6-4H10z" fill="currentColor" fill-opacity=".2"/><path d="M10 13V5M7 8l3-3 3 3"/></svg>Estrudi forma</button>
     <button class="tool" id="s3Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Misure</button>
     <button class="tool" id="s3Vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 4h12l-1.5 16h-9z"/><path d="M7 11h10" /><path d="M7.3 11h9.4l-.8 9H8.1z" fill="currentColor" fill-opacity=".3"/></svg>Volume</button>
     <button class="tool" id="s3Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Annulla</button>
     <button class="tool" id="s3View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Vista</button>
+    <button class="tool" id="s3Merge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 9h9v11H3zM12 13h9v7h-9"/><path d="M12 9v4" stroke-dasharray="2 2"/></svg>Unisci</button>
     <button class="tool" id="s3Dup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg>Duplica</button>
     <button class="tool danger" id="s3Del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Elimina</button>
   </nav>
@@ -198,6 +200,7 @@ input,select{-webkit-user-select:text;user-select:text}
 <script>
 'use strict';
 /* =================== DATI =================== */
+const APP_VERSION = '4';   // si vede toccando il pulsante dell'account: serve a capire se il telefono ha l'ultima versione
 const LS_KEY = 'misure_forme_v1';
 const OPT_KEY = 'misure_forme_opts';
 const OWNER_KEY = 'misure_forme_owner';
@@ -377,7 +380,7 @@ function paramForm(o){
     <div class="mrow left">${o.onDel ? `<button class="btn danger" id="pfDel">${esc(o.delLabel || 'Elimina')}</button>` : '<span></span>'}
       <span style="display:flex;gap:8px"><button class="btn ghost" id="pfCancel">Annulla</button><button class="btn primary" id="pfOk">${esc(o.okLabel || 'Salva')}</button></span></div>`);
   const first = o.fields.findIndex(f => f.t !== 'sel');
-  if(first >= 0) setTimeout(() => { const el = $('#pf' + first); if(el){ el.focus(); el.select(); } }, 60);
+  if(first >= 0) setTimeout(() => focusEnd($('#pf' + first)), 60);
   if(hasLen) $('#pfU').onchange = e => {
     const nu = e.target.value;
     o.fields.forEach((f,i) => { if(f.t !== 'len') return; const el = $('#pf'+i); const v = parseNum(el.value); if(isFinite(v)) el.value = numStr(fromCm(toCm(v, u), nu)); });
@@ -537,7 +540,7 @@ $('#acct').onclick = () => {
   const desc = cloud
     ? `Sei collegato${acct.name ? ' come <b>' + esc(acct.name) + '</b>' : ''}. I tuoi disegni sono salvati nel <b>tuo account</b>: li ritrovi uguali sul telefono, sul tablet e sul PC aprendo l'app con lo stesso account.<br><br>Ogni persona che apre l'app con il <b>proprio</b> account ha uno spazio di lavoro tutto suo: tu non vedi i suoi disegni e lui non vede i tuoi.`
     : `In questo momento i disegni sono salvati <b>solo su questo dispositivo</b>.<br><br>Per averli su tutti i dispositivi e con account separati apri l'app dal link di Claude (claude.ai) e accedi con il tuo account. Qui sotto puoi anche esportare un backup e importarlo su un altro dispositivo.`;
-  actionSheet(cloud ? 'Il tuo account' : 'Salvataggio', [
+  actionSheet((cloud ? 'Il tuo account' : 'Salvataggio') + ' · versione ' + APP_VERSION, [
     {label:'⬇️ Esporta backup (file .json)', fn: exportBackup},
     {label:'⬆️ Importa backup', fn: () => $('#fileIn').click()},
   ], desc);
@@ -688,7 +691,7 @@ function moveShape(s, dx, dy){
 }
 
 /* ---- UNIONE di due forme che si toccano lungo un lato: il lato in comune sparisce ---- */
-function mergeEps(){ return Math.max(tolPx()/view.z*0.35, 1e-12); }
+function mergeEps(){ return Math.max(tolPx()/view.z*0.5, 1e-12); }
 function shapeRings(s){
   const o = s.pts.map(q => ({x:q.x, y:q.y})); if(polyArea(o) < 0) o.reverse();
   const hs = (s.holes||[]).map(h => { const r = h.map(q => ({x:q.x, y:q.y})); if(polyArea(r) > 0) r.reverse(); return r; });
@@ -820,7 +823,7 @@ function openEditor(id){
   D = db.drawings.find(d => d.id === id);
   if(!D.solids) D.solids = [];
   D.shapes.forEach(s => { if(!s.measures) s.measures = {}; if(s.geo) regen(s); });
-  history = []; draft = []; rubber = null; draftFrom = null; draftMeasures = {}; mergePick = null; selShape = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
+  history = []; draft = []; rubber = null; draftFrom = null; draftMeasures = {}; mergePick = null; mergePick3 = null; selShape = null; selSolid = null; act = null; act3 = null; resultKind = null; showArea = false;
   cam = {yaw:-0.38, pitch:0.5, k:1, px:0, py:0}; viewIdx = 0;
   $('#home').classList.add('hidden'); $('#editor').classList.remove('hidden');
   $('#unitSel').value = D.unit;
@@ -1090,26 +1093,36 @@ function hitShape(sp){
   for(let k=D.shapes.length-1;k>=0;k--){ const s = D.shapes[k]; if(s.closed && inPoly(w, s.pts) && !(s.holes||[]).some(h => inPoly(w, h))) return s; }
   return null;
 }
-function openShapeOrSide(shape, i){ if(shape.geo) openShapeDims(shape, i); else openMeasure(shape, i); }
+/* Tocco su un lato: se è la linea in comune tra due forme si può eliminare (le forme diventano una),
+   altrimenti si apre la misura */
+function openShapeOrSide(shape, i){
+  const nb = sharedNeighbor(shape, i);
+  const measure = () => shape.geo ? openShapeDims(shape) : openMeasure(shape, i);
+  if(!nb) return measure();
+  selShape = shape.id; draw();
+  actionSheet('Linea in comune tra due forme', [
+    {label:'✂️ Elimina questa linea (unisci in una forma sola)', fn: () => tryMerge(shape, nb)},
+    {label:'📏 Scrivi la misura di questo lato', fn: measure},
+  ], 'Eliminando la linea le due forme diventano un’unica forma, con un’unica area.');
+}
+/* cursore alla fine del numero, senza selezionarlo tutto */
+function focusEnd(el){ if(!el) return; el.focus(); try{ const n = el.value.length; el.setSelectionRange(n, n); }catch(e){} }
 
 /* ---- MISURA di un lato ---- */
 function openMeasure(shape, i){
   selShape = shape.id; draw();
-  const cur = segLenCm(shape, i), m = shape.measures[i], nb = sharedNeighbor(shape, i);
+  const m = shape.measures[i];
   let u = D.unit;
-  const val = m != null ? fromCm(m,u) : (cur != null ? fromCm(cur,u) : '');
-  const valStr = val === '' ? '' : numStr(val);
+  const valStr = m != null ? numStr(fromCm(m, u)) : '';
   const desc = D.scale
-    ? `Lunghezza attuale ≈ ${fmtLen(cur)}. Inserisci la misura reale: il disegno si adatterà.`
-    : `Prima misura del disegno: serve a fissare la scala. Gli altri lati verranno calcolati in proporzione.`;
+    ? `Scrivi la misura reale di questo lato: il disegno si adatterà.`
+    : `Prima misura del disegno: serve a fissare la scala del disegno.`;
   openModal(`<h3>Misura del lato</h3><p>${desc}</p>
     <div class="in-row"><input id="mVal" class="inp" inputmode="decimal" autocomplete="off" placeholder="es. 3,50" value="${valStr}">
     <select id="mUnit">${UNITS.map(x => `<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></div>
-    ${nb ? `<div class="sheet-actions"><button class="btn" id="mMerge">✂️ Elimina questa linea e unisci le due forme</button></div>` : ''}
     <div class="mrow left">${m != null ? `<button class="btn danger" id="mDel">Rimuovi misura</button>` : '<span></span>'}
       <span style="display:flex;gap:8px"><button class="btn ghost" id="mCancel">Annulla</button><button class="btn primary" id="mOk">Salva</button></span></div>`);
-  const inp = $('#mVal'); if(!nb) setTimeout(() => { inp.focus(); inp.select(); }, 60);
-  if(nb) $('#mMerge').onclick = () => { closeModal(); tryMerge(shape, nb); };
+  const inp = $('#mVal'); setTimeout(() => focusEnd(inp), 60);
   // cambiando unità il numero viene convertito (350 cm → 3,5 m), così la forma non cambia
   $('#mUnit').onchange = e => { const v = parseNum(inp.value); if(isFinite(v)) inp.value = numStr(fromCm(toCm(v, u), e.target.value)); u = e.target.value; };
   $('#mCancel').onclick = closeModal;
@@ -1118,7 +1131,7 @@ function openMeasure(shape, i){
     if(!(v > 0)){ inp.style.borderColor = 'var(--danger)'; inp.focus(); return; }
     const unit = $('#mUnit').value;
     if(unit !== D.unit) setUnit(unit);
-    closeModal(); pushHistory(); applyMeasure(shape, i, toCm(v, unit)); save(); refresh();
+    closeModal(); pushHistory(); applyMeasure(shape, i, toCm(v, unit)); save(); refresh(); keepInView();
   };
   inp.onkeydown = e => { if(e.key === 'Enter') $('#mOk').click(); if(e.key === 'Escape') closeModal(); };
   if(m != null) $('#mDel').onclick = () => {
@@ -1143,14 +1156,16 @@ function applyMeasure(shape, i, cm){
   shape.measures[i] = cm;
 }
 /* ---- MISURE di una forma parametrica (cerchio, triangolo, ...) ---- */
-function openShapeDims(s, edge){
+/* le misure che hai scritto tu (le altre non vengono proposte) */
+function geoMeasured(s, k){ return !!(s.geo.measured && (s.geo.mk ? s.geo.mk[k] : true)); }
+function geoAllMeasured(s){ return SH[s.geo.t].ps.every(q => q.t !== 'len' || geoMeasured(s, q.k)); }
+function openShapeDims(s){
   selShape = s.id; draw();
-  const T = SH[s.geo.t], p = s.geo.p, nb = edge != null ? sharedNeighbor(s, edge) : null;
+  const T = SH[s.geo.t], p = s.geo.p;
   paramForm({
-    extra: nb ? {label:'✂️ Elimina questa linea e unisci le due forme', fn: () => tryMerge(s, nb)} : null,
     title: 'Misure: ' + T.nm,
-    desc: D.scale ? 'Scrivi le misure reali: la forma si adatta.' : 'Prima misura del disegno: fissa la scala. Puoi scriverne anche una sola, le altre restano in proporzione.',
-    fields: T.ps.map(q => ({k:q.k, n:q.n, t:q.t, v: q.t === 'len' ? (D.scale ? p[q.k]*D.scale : null) : p[q.k]})),
+    desc: D.scale ? 'Scrivi le misure reali: la forma si adatta.' : 'Prima misura del disegno: fissa la scala del disegno.',
+    fields: T.ps.map(q => ({k:q.k, n:q.n, t:q.t, v: q.t === 'len' ? (D.scale && geoMeasured(s, q.k) ? p[q.k]*D.scale : null) : p[q.k]})),
     rot: s.geo.rot || 0,
     name: {v:s.name, ph:T.nm},
     delLabel: 'Elimina forma', onDel: () => { selShape = s.id; deleteSelected(); },
@@ -1158,18 +1173,18 @@ function openShapeDims(s, edge){
       const np = {...p}; let sc = D.scale;
       const lens = T.ps.filter(q => q.t === 'len');
       if(!sc){ const first = lens.find(q => vals[q.k] != null); if(first) sc = vals[first.k] / p[first.k]; }
-      let anyLen = false;
+      let anyLen = false; const mk = {...(s.geo.mk || (s.geo.measured ? Object.fromEntries(lens.map(q => [q.k, true])) : {}))};
       T.ps.forEach(q => {
-        if(vals[q.k] == null) return;
-        if(q.t === 'len'){ if(sc){ np[q.k] = vals[q.k] / sc; anyLen = true; } }
+        if(vals[q.k] == null){ if(q.t === 'len') delete mk[q.k]; return; }
+        if(q.t === 'len'){ if(sc){ np[q.k] = vals[q.k] / sc; anyLen = true; mk[q.k] = true; } }
         else np[q.k] = vals[q.k];
       });
       const err = T.chk && T.chk(np); if(err) return err;
       pushHistory();
       D.scale = sc; s.geo.p = np; s.geo.rot = ex.rot || 0; s.name = ex.name || '';
-      if(anyLen) s.geo.measured = true;
+      s.geo.mk = mk; s.geo.measured = anyLen || Object.keys(mk).length > 0;
       if(ex.unit !== D.unit) setUnit(ex.unit);
-      regen(s); save(); refresh();
+      regen(s); save(); refresh(); keepInView();
       return null;
     }
   });
@@ -1206,8 +1221,8 @@ function renderResult(){
       }
     });
     if(cnt > 1) body += `<div class="row tot"><span><b>Totale</b></span><span class="v">${resultKind === 'area' ? fmtArea(tot) : fmtLen(tot)}</span></div>`;
-    const unmeasured = D.shapes.reduce((n,s) => n + (s.geo ? (s.geo.measured ? 0 : 1) : segCount(s) - Object.keys(s.measures).length), 0);
-    if(unmeasured) body += `<div class="note" style="margin-top:8px">ℹ️ Le misure con ≈ sono calcolate in proporzione dal disegno.</div>`;
+    const unmeasured = D.shapes.reduce((n,s) => n + (s.geo ? (geoAllMeasured(s) ? 0 : 1) : segCount(s) - Object.keys(s.measures).length), 0);
+    if(unmeasured) body += `<div class="note" style="margin-top:8px">ℹ️ Alcuni lati non hanno ancora la tua misura: finché non la scrivi, il calcolo usa la forma come l’hai disegnata.</div>`;
     body += `<div class="mrow"><button class="btn sm primary" id="rPdf">📄 Computo metrico PDF</button></div>`;
   }
   el.innerHTML = `<h4>${title}<button id="rClose" aria-label="Chiudi">✕</button></h4>${body}`;
@@ -1222,6 +1237,7 @@ function updateHint(){
   let h = toastMsg;
   if(!h){
     if(mergePick && mode === '2d') h = 'Tocca la forma da unire: il lato in comune verrà eliminato';
+    else if(mergePick3 && mode === '3d') h = 'Tocca il solido da attaccare (premi di nuovo Unisci per annullare)';
     else if(mode === '3d') h = D && D.solids.length ? 'Trascina per ruotare · 2 dita o rotella: zoom · tocca un solido, ritoccalo per le misure' : 'Aggiungi un solido o estrudi una forma del disegno 2D';
     else if(tool === 'line') h = draft.length ? (draft.length >= 3 ? 'Tocca il 1° punto per chiudere · tocca l’ultimo per terminare' : 'Tocca o trascina per aggiungere il prossimo punto')
                                         : 'Tocca per mettere i punti o trascina per tracciare una linea · tocca un lato per la misura';
@@ -1234,6 +1250,8 @@ function updateHint(){
 $('#sMerge').onclick = () => { if(mergePick) return; mergePick = selShape; refresh(); };
 $('#sMergeX').onclick = () => { mergePick = null; refresh(); };
 function refresh(){
+  if(mergePick3 && (!D || mode !== '3d' || !D.solids.find(s => s.id === mergePick3))) mergePick3 = null;
+  $('#s3Merge').classList.toggle('on', !!mergePick3);
   if(mergePick && (!D || mode !== '2d' || tool !== 'select' || !D.shapes.find(s => s.id === mergePick))) mergePick = null;
   const selS = D && D.shapes.find(s => s.id === selShape);
   const showSel = !!D && mode === '2d' && tool === 'select' && !resultKind && ((selS && selS.closed && D.shapes.filter(s => s.closed).length > 1) || mergePick);
@@ -1268,6 +1286,14 @@ function fitView(){
   view = {z, x: W/2 - (x0+bw/2)*z, y: H/2 - (y0+bh/2)*z + 10};
   draw();
 }
+/* dopo una misura il disegno resta sempre visibile sullo schermo (se esce o diventa minuscolo, si riadatta) */
+function keepInView(){
+  if(!D || mode !== '2d' || !D.shapes.length) return;
+  const W = cv.clientWidth, H = cv.clientHeight;
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  D.shapes.forEach(s => s.pts.forEach(q => { const p = ws(q); x0=Math.min(x0,p.x); y0=Math.min(y0,p.y); x1=Math.max(x1,p.x); y1=Math.max(y1,p.y); }));
+  if(x0 < 8 || y0 < 50 || x1 > W - 8 || y1 > H - 70 || (x1 - x0 < 60 && y1 - y0 < 60)) fitView();
+}
 function zoomAt(p, f){
   if(mode === '3d') return zoom3D(p, f);
   const w = toW(p), z = clamp(view.z * f, ZMIN, ZMAX);
@@ -1299,13 +1325,6 @@ function draw(){
     const pv = buildFromBox(act.a, act.b);
     ctx.setLineDash([6,4]); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(31,111,235,.08)';
     pathShape(pv); ctx.fill('evenodd'); ctx.stroke(); ctx.setLineDash([]);
-    if(D.scale){
-      if(pv.kind){
-        const a = ws(pv.pts[0]), b = ws(pv.pts[2]);
-        pill(fmtLen((pv.pts[1].x - pv.pts[0].x)*D.scale), (a.x+b.x)/2, a.y - 14, 0, '#1f6feb');
-        pill(fmtLen((pv.pts[2].y - pv.pts[1].y)*D.scale), b.x + 8, (a.y+b.y)/2, -Math.PI/2, '#1f6feb');
-      } else if(isCurved(pv)){ const c = ws(centroid(pv.pts)); pill(SH[pv.geo.t].lab(pv.geo.p), c.x, c.y, 0, '#1f6feb'); }
-    }
   }
   if(act && act.type === 'free' && act.pts.length > 1){
     ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2.5; ctx.lineJoin = ctx.lineCap = 'round';
@@ -1347,19 +1366,20 @@ function drawShape(s){
 function drawLabels(s){
   const n = s.pts.length, sel = s.id === selShape;
   const C = ws(s.closed ? centroid(s.pts) : {x: s.pts.reduce((a,p)=>a+p.x,0)/n, y: s.pts.reduce((a,p)=>a+p.y,0)/n});
+  // si mostrano solo le misure scritte da te: i lati senza misura restano vuoti (con "?" se la forma è selezionata)
   if(s.geo){
-    if(!D.scale){ if(sel) pill('tocca per le misure', C.x, C.y + (showArea ? 24 : 0), 0, '#6b7686'); return; }
-    if(isCurved(s)){ pill((s.geo.measured ? '' : '≈ ') + SH[s.geo.t].lab(s.geo.p), C.x, C.y + (showArea ? 24 : 0), 0, s.geo.measured ? '#1b2330' : '#6b7686', null, !!s.geo.measured); return; }
+    const all = D.scale && geoAllMeasured(s);
+    if(!all){ if(sel) pill('tocca per le misure', C.x, C.y + (showArea ? 24 : 0), 0, '#6b7686'); return; }
+    if(isCurved(s)){ pill(SH[s.geo.t].lab(s.geo.p), C.x, C.y + (showArea ? 24 : 0), 0, '#1b2330', null, true); return; }
   }
   for(let i=0;i<segCount(s);i++){
     const A = ws(s.pts[i]), B = ws(s.pts[(i+1)%n]), sl = dist(A,B);
     if(sl < 28) continue;
     const m = s.geo ? null : s.measures[i], cm = segLenCm(s, i);
-    let text, color, bold = m != null;
-    if(cm == null){ if(!sel) continue; text = '? misura'; color = '#9aa4b2'; }
-    else if(s.geo){ text = (s.geo.measured ? '' : '≈ ') + fmtLen(cm); color = s.geo.measured ? '#1b2330' : '#6b7686'; bold = !!s.geo.measured; }
-    else if(m != null){ const bad = Math.abs(cm - m) / m > 0.005; text = fmtLen(cm); color = bad ? '#d93a3a' : '#1b2330'; }
-    else { text = '≈ ' + fmtLen(cm); color = '#6b7686'; }
+    let text, color, bold = true;
+    if(s.geo){ text = fmtLen(cm); color = '#1b2330'; }
+    else if(m != null){ const bad = cm != null && Math.abs(cm - m) / m > 0.005; text = fmtLen(m); color = bad ? '#d93a3a' : '#1b2330'; }
+    else { if(!sel) continue; text = '?'; color = '#9aa4b2'; bold = false; }
     const mid = {x:(A.x+B.x)/2, y:(A.y+B.y)/2};
     let nx = -(B.y-A.y)/sl, ny = (B.x-A.x)/sl;
     if(nx*(mid.x-C.x) + ny*(mid.y-C.y) < 0){ nx = -nx; ny = -ny; }
@@ -1374,11 +1394,6 @@ function drawDraft(){
   ctx.lineJoin = ctx.lineCap = 'round';
   ctx.beginPath(); P.forEach((p,i) => i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y));
   ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2.5; ctx.stroke();
-  if(D.scale) for(let i=0;i<draft.length-1;i++){
-    const A = P[i], B = P[i+1]; if(dist(A,B) < 40) continue;
-    let ang = Math.atan2(B.y-A.y, B.x-A.x); if(ang > Math.PI/2) ang -= Math.PI; if(ang < -Math.PI/2) ang += Math.PI;
-    pill('≈ ' + fmtLen(dist(draft[i], draft[i+1])*D.scale), (A.x+B.x)/2, (A.y+B.y)/2 - 14, ang, '#1f6feb');
-  }
   if(rubber){
     const L = P[P.length-1], R = ws(rubber);
     if(rubber.gx){ const g = ws(rubber.gx); guide(g, R); }
@@ -1386,7 +1401,6 @@ function drawDraft(){
     ctx.setLineDash([7,5]); ctx.beginPath(); ctx.moveTo(L.x,L.y); ctx.lineTo(R.x,R.y); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
     ctx.beginPath(); ctx.arc(R.x, R.y, rubber.snap ? 9 : 4, 0, Math.PI*2);
     ctx.strokeStyle = rubber.snap ? '#f59e0b' : '#1f6feb'; ctx.lineWidth = 2; ctx.stroke();
-    if(D.scale && dist(L,R) > 30) pill('≈ ' + fmtLen(dist(draft[draft.length-1], rubber)*D.scale), R.x, R.y - 24, 0, '#1f6feb');
   }
   P.forEach((p,i) => {
     ctx.beginPath(); ctx.arc(p.x, p.y, i === 0 && draft.length >= 3 ? 9 : 5, 0, Math.PI*2);
@@ -1646,11 +1660,64 @@ const SOL = {
     vol:p => { const R = (p.D - p.d)/2, r = p.d/2; return 2*Math.PI*Math.PI*R*r*r; },
     mesh:p => { const R = (p.D - p.d)/2, r = p.d/2, pr = []; for(let i=0;i<=32;i++){ const t = -Math.PI/2 + TAU*i/32; pr.push([R + r*Math.cos(t), r + r*Math.sin(t)]); } return revolve(pr, 64); }},
   extrude:{nm:'Forma 2D estrusa', ps:[Lp('h','Altezza / spessore')]},
+  group:{nm:'Solido unito', ps:[]},
 };
+/* ---- solidi uniti: più solidi attaccati diventano un oggetto solo ---- */
+function meshBox(F){
+  if(!F || !F.length) return null;
+  const b = [Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity];
+  F.forEach(f => f.p.forEach(q => { for(let i=0;i<3;i++){ b[i] = Math.min(b[i], q[i]); b[i+3] = Math.max(b[i+3], q[i]); } }));
+  return b;
+}
+const vkey = q => q.map(v => Math.round(v*1000)/1000).join(',');
+function groupMesh(so){
+  let F = [];
+  for(const part of so.parts){
+    const pf = solidMesh(part); if(!pf) continue;
+    const t = part.pos || [0,0,0], mv = q => [q[0]+t[0], q[1]+t[1], q[2]+t[2]];
+    pf.forEach(f => F.push({p:f.p.map(mv), h:f.h ? f.h.map(r => r.map(mv)) : null, e:f.e}));
+  }
+  if(!F.length) return null;
+  // le facce che combaciano tra due parti (la "parete" che le separa) spariscono
+  const fk = f => f.p.map(vkey).sort().join('|'), seen = new Map();
+  F.forEach((f, i) => { if(f.h && f.h.length) return; const k = fk(f); if(!seen.has(k)) seen.set(k, []); seen.get(k).push(i); });
+  const drop = new Set();
+  seen.forEach(ids => { if(ids.length >= 2) ids.forEach(i => drop.add(i)); });
+  F = F.filter((f, i) => !drop.has(i));
+  // spigoli: si disegnano solo dove c'è un vero angolo, non sulla giunzione tra due facce allineate
+  const edges = new Map();
+  F.forEach(f => { if(!f.e) return; f.n = newell(f.p); f.p.forEach((a, i) => { const b = f.p[(i+1)%f.p.length], k = [vkey(a), vkey(b)].sort().join('#'); if(!edges.has(k)) edges.set(k, []); edges.get(k).push(f.n); }); });
+  F.forEach(f => { if(!f.e) return; f.ed = f.p.map((a, i) => { const b = f.p[(i+1)%f.p.length], ns = edges.get([vkey(a), vkey(b)].sort().join('#'));
+    return ns.length !== 2 || (ns[0][0]*ns[1][0] + ns[0][1]*ns[1][1] + ns[0][2]*ns[1][2]) < 0.999; }); });
+  return F;
+}
+function partsOf(so){
+  if(so.t === 'group') return so.parts.map(p => JSON.parse(JSON.stringify(p)));
+  const p = {t:so.t, p:{...so.p}, pos:[0,0,0]}; if(so.sid) p.sid = so.sid; return [p];
+}
+function mergeSolids(a, b, where){
+  const ba = meshBox(solidMesh(a)), bb = meshBox(solidMesh(b));
+  if(!ba || !bb) return 'Uno dei due solidi non ha ancora le misure complete.';
+  const cxA = (ba[0]+ba[3])/2, cyA = (ba[1]+ba[4])/2, cxB = (bb[0]+bb[3])/2, cyB = (bb[1]+bb[4])/2;
+  const t = {
+    right:[ba[3]-bb[0], cyA-cyB, ba[2]-bb[2]], left:[ba[0]-bb[3], cyA-cyB, ba[2]-bb[2]],
+    top:[cxA-cxB, cyA-cyB, ba[5]-bb[2]], front:[cxA-cxB, ba[1]-bb[4], ba[2]-bb[2]], back:[cxA-cxB, ba[4]-bb[1], ba[2]-bb[2]],
+  }[where];
+  const pb = partsOf(b).map(p => ({...p, pos:[p.pos[0]+t[0], p.pos[1]+t[1], p.pos[2]+t[2]]}));
+  const g = {id:uid(), t:'group', p:{}, parts:[...partsOf(a), ...pb], name:a.name || b.name || ''};
+  pushHistory();
+  const ia = D.solids.indexOf(a);
+  D.solids = D.solids.filter(s => s !== a && s !== b); D.solids.splice(Math.max(0, ia), 0, g);
+  selSolid = g.id; save(); fit3D(); refresh();
+  toast('Solidi uniti in uno solo ✓ Volume: ' + (solidVol(g) != null ? fmtVol(solidVol(g)) : '—'));
+  return null;
+}
+let mergePick3 = null;
 const SOL_ORDER = ['box','cube','cyl','tube','cone','frustum','sphere','hemi','cap','ellipsoid','pyramid','pyrFr','triPrism','hexPrism','torus'];
 
 function solidMesh(so){
   const T = SOL[so.t]; if(!T) return null;
+  if(so.t === 'group') return groupMesh(so);
   if(so.t === 'extrude'){
     const s = D.shapes.find(x => x.id === so.sid);
     if(!s || !s.closed || !D.scale || !(so.p.h > 0)) return null;
@@ -1660,14 +1727,17 @@ function solidMesh(so){
   return T.mesh(so.p);
 }
 function solidVol(so){
+  if(so.t === 'group'){ let t = 0; for(const p of so.parts){ const v = solidVol(p); if(v == null) return null; t += v; } return t; }
   if(so.t === 'extrude'){ const s = D.shapes.find(x => x.id === so.sid); const a = s && shapeAreaCm2(s); return a ? a * so.p.h : null; }
   return SOL[so.t].vol(so.p);
 }
 function solidName(so){
+  if(so.t === 'group') return 'Solido unito (' + so.parts.map(p => solidName(p)).join(' + ') + ')';
   if(so.t === 'extrude'){ const s = D.shapes.find(x => x.id === so.sid), k = D.shapes.indexOf(s); return s ? 'Estrusione di ' + shapeLabel(s, k).replace(/^\d+\. /, '') : 'Estrusione (forma eliminata)'; }
   return SOL[so.t].nm;
 }
 function solidDims(so){
+  if(so.t === 'group'){ const b = meshBox(solidMesh(so)); return b ? 'ingombro ' + fmtLen(b[3]-b[0], 'm') + ' × ' + fmtLen(b[4]-b[1], 'm') + ' × h ' + fmtLen(b[5]-b[2], 'm') : 'misure incomplete'; }
   if(so.t === 'extrude'){ const s = D.shapes.find(x => x.id === so.sid); const a = s && shapeAreaCm2(s); return (a ? 'area ' + fmtArea(a, 'm') + ' × ' : '') + 'h ' + fmtLen(so.p.h, 'm'); }
   return SOL[so.t].ps.map(q => q.n.replace(/ (di base|del triangolo|della sezione|dell’esagono)$/, '') + ' ' + fmtLen(so.p[q.k], 'm')).join(', ');
 }
@@ -1688,7 +1758,7 @@ function buildScene(solids){
   items.forEach(it => {
     it.dx -= tw/2;
     const mv = q => [q[0] + it.dx, q[1] + it.dy, q[2]];
-    it.F = it.F.map(f => ({p:f.p.map(mv), h:f.h ? f.h.map(r => r.map(mv)) : null, e:f.e, n:newell(f.p)}));
+    it.F = it.F.map(f => ({p:f.p.map(mv), h:f.h ? f.h.map(r => r.map(mv)) : null, e:f.e, ed:f.ed, n:newell(f.p)}));
     it.top = [(it.b[0] + it.b[3])/2 + it.dx, 0, it.b[5]];
   });
   const yspan = Math.max(...items.map(it => it.b[4] - it.b[1]));
@@ -1711,8 +1781,10 @@ function fitCam(c, W, H, sc){
   const f = mkProj(W, H, {...c, k:1, px:0, py:0}, sc);
   let x0=Infinity,x1=-Infinity,u0=Infinity,u1=-Infinity;
   sc.items.forEach(it => it.F.forEach(fc => fc.p.forEach(q => { const r = f(q); x0=Math.min(x0,r.X); x1=Math.max(x1,r.X); u0=Math.min(u0,r.U); u1=Math.max(u1,r.U); })));
-  c.k = clamp(Math.min((W - 70)/Math.max(x1-x0, 1e-9), (H - 150)/Math.max(u1-u0, 1e-9)), ZMIN, ZMAX);
-  c.px = -c.k*(x0+x1)/2; c.py = c.k*(u0+u1)/2 + 12;
+  // margini proporzionati alla finestra: così funziona anche nei riquadri piccoli (anteprime, telefono)
+  const mw = Math.min(130, W*0.26), mh = Math.min(170, H*0.28);
+  c.k = clamp(Math.min((W - mw)/Math.max(x1-x0, 1e-9), (H - mh)/Math.max(u1-u0, 1e-9)), ZMIN, ZMAX);
+  c.px = -c.k*(x0+x1)/2; c.py = c.k*(u0+u1)/2 + Math.min(12, H*0.02);
 }
 function fit3D(){ if(!D) return; fitCam(cam, cv.clientWidth, cv.clientHeight, buildScene(D.solids)); draw(); }
 function zoom3D(p, f){
@@ -1751,6 +1823,13 @@ function render3D(c, W, H, cm, o){
     [fc.pr, ...(fc.hr || [])].forEach(r => { r.forEach((q,i) => i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y)); c.closePath(); });
     c.fillStyle = `rgb(${col})`; c.fill('evenodd');
     c.lineJoin = 'round';
+    if(fc.f.ed){
+      // solido unito: prima si coprono le giunzioni col colore della faccia, poi si disegnano solo gli spigoli veri
+      c.strokeStyle = `rgb(${col})`; c.lineWidth = 1.2; c.stroke();
+      c.beginPath(); fc.pr.forEach((q, i) => { if(!fc.f.ed[i]) return; const r = fc.pr[(i+1)%fc.pr.length]; c.moveTo(q.x, q.y); c.lineTo(r.x, r.y); });
+      c.strokeStyle = sel ? '#0b3d91' : 'rgba(20,30,50,.55)'; c.lineWidth = 1; c.stroke();
+      return;
+    }
     if(fc.f.e){ c.strokeStyle = sel ? '#0b3d91' : 'rgba(20,30,50,.55)'; c.lineWidth = 1; }
     else { c.strokeStyle = `rgb(${col})`; c.lineWidth = 0.5; }
     c.stroke();
@@ -1809,6 +1888,17 @@ function move3D(p){
 function up3D(p){
   const a = act3; act3 = null; if(!a || a.moved) return;
   const id = pick3D(p);
+  if(mergePick3){
+    const a = D.solids.find(s => s.id === mergePick3), b = D.solids.find(s => s.id === id);
+    if(!b || b === a){ toast('Tocca un altro solido da attaccare'); return; }
+    mergePick3 = null;
+    const go = w => { const err = mergeSolids(a, b, w); if(err) actionSheet('Unione non riuscita', [], esc(err)); };
+    actionSheet('Dove attacco “' + (b.name || solidName(b)) + '”?', [
+      {label:'➡️ Accanto, a destra', fn: () => go('right')}, {label:'⬅️ Accanto, a sinistra', fn: () => go('left')},
+      {label:'⬆️ Sopra', fn: () => go('top')}, {label:'↙️ Davanti', fn: () => go('front')}, {label:'↗️ Dietro', fn: () => go('back')},
+    ], 'I due solidi diventano uno solo: la parete che li separa sparisce e il volume è la somma.');
+    return;
+  }
   if(id && id === selSolid){ const so = D.solids.find(s => s.id === id); if(so) openSolidForm(so); }
   else selSolid = id;
 }
@@ -1817,10 +1907,11 @@ function up3D(p){
 const solidIconCache = {};
 function solidIcon(t){
   if(solidIconCache[t]) return solidIconCache[t];
-  const c = document.createElement('canvas'); c.width = 120; c.height = 88;
+  const c = document.createElement('canvas'); c.width = 240; c.height = 176;
   const x = c.getContext('2d'), so = {id:'x', t, p:{...SOL[t].def}};
-  const sc = buildScene([so]), cm = {yaw:-0.62, pitch:0.5, k:1, px:0, py:0};
-  fitCam(cm, 120, 88 + 60, sc); cm.py -= 8;
+  x.scale(2, 2);
+  const sc = buildScene([so]), cm = {yaw:-0.5, pitch:0.45, k:1, px:0, py:0};
+  fitCam(cm, 120, 88, sc); cm.py -= 2;
   render3D(x, 120, 88, cm, {solids:[so], labels:false, grid:false, bg:'#ffffff', sel:null});
   return solidIconCache[t] = c.toDataURL();
 }
@@ -1843,6 +1934,12 @@ $('#s3Del').onclick = deleteSolid;
 $('#s3Undo').onclick = undo;
 $('#s3Vol').onclick = () => { resultKind = resultKind === 'vol' ? null : 'vol'; renderResult(); };
 $('#s3View').onclick = () => { viewIdx = (viewIdx + 1) % VIEWS.length; const v = VIEWS[viewIdx]; cam.yaw = v.yaw; cam.pitch = v.pitch; fit3D(); toast('Vista: ' + v.n); };
+$('#s3Merge').onclick = () => {
+  if(D.solids.length < 2) return toast('Servono almeno due solidi');
+  if(mergePick3){ mergePick3 = null; refresh(); return toast('Unione annullata'); }
+  if(!selSolid) return toast('Tocca prima il primo solido, poi premi Unisci');
+  mergePick3 = selSolid; refresh();
+};
 $('#s3Dup').onclick = () => {
   const so = D.solids.find(s => s.id === selSolid); if(!so) return toast('Tocca prima un solido per selezionarlo');
   pushHistory(); const c = JSON.parse(JSON.stringify(so)); c.id = uid(); D.solids.push(c); selSolid = c.id; save(); fit3D(); refresh();
@@ -1852,6 +1949,19 @@ function deleteSolid(){
   pushHistory(); D.solids = D.solids.filter(s => s.id !== selSolid); selSolid = null; save(); refresh(); toast('Solido eliminato · premi Annulla per recuperarlo');
 }
 function openSolidForm(so, isNew){
+  if(so.t === 'group'){
+    selSolid = so.id;
+    const v = solidVol(so);
+    return actionSheet(so.name || 'Solido unito', [
+      {label:'✏️ Dai un nome', fn: async () => { const n = await askText('Nome del solido', so.name || '', 'Salva'); if(n != null){ pushHistory(); so.name = n; save(); refresh(); } }},
+      {label:'↔️ Separa di nuovo i solidi', fn: () => {
+        pushHistory(); const i = D.solids.indexOf(so);
+        const parts = so.parts.map(p => { const s = {id:uid(), t:p.t, p:{...p.p}, name:''}; if(p.sid) s.sid = p.sid; return s; });
+        D.solids.splice(i, 1, ...parts); selSolid = null; save(); fit3D(); refresh(); toast('Solidi separati');
+      }},
+      {label:'🗑 Elimina', danger:true, fn: deleteSolid},
+    ], esc(so.parts.map(p => solidName(p)).join(' + ')) + '<br>Volume totale: <b>' + (v != null ? fmtVol(v) + ' (' + fmtLitri(v) + ')' : '—') + '</b><br>' + esc(solidDims(so)));
+  }
   const T = SOL[so.t];
   const fields = T.ps.map(q => ({k:q.k, n:q.n, t:'len', v:so.p[q.k]}));
   if(so.t === 'extrude') fields.unshift({k:'sid', n:'Forma 2D da estrudere', t:'sel', v:so.sid,
@@ -2074,11 +2184,11 @@ function pdfDrawing(pdf, bx, by, bw, bh){
     pdf.op(`0.9 0.94 1 rg 0.14 0.19 0.26 RG 0.9 w 1 J 1 j\n${o}${s.closed ? 'B*' : 'S'}`);
   });
   if(D.scale) D.shapes.forEach(s => {
-    if(isCurved(s)) return;
+    if(isCurved(s) || (s.geo && !geoAllMeasured(s))) return;
     const n = s.pts.length, C = P(s.closed ? centroid(s.pts) : {x:s.pts.reduce((a,p)=>a+p.x,0)/n, y:s.pts.reduce((a,p)=>a+p.y,0)/n});
     for(let i=0;i<segCount(s);i++){
       const A = P(s.pts[i]), B = P(s.pts[(i+1)%n]), L = Math.hypot(B[0]-A[0], B[1]-A[1]);
-      if(L < 34) continue;
+      if(L < 34 || (!s.geo && s.measures[i] == null)) continue;
       const mid = [(A[0]+B[0])/2, (A[1]+B[1])/2]; let nx = -(B[1]-A[1])/L, ny = (B[0]-A[0])/L;
       if(nx*(mid[0]-C[0]) + ny*(mid[1]-C[1]) < 0){ nx = -nx; ny = -ny; }
       pdf.text(mid[0] + nx*10, mid[1] + ny*10 - 2.5, fmtLen(segLenCm(s, i)), 6.5, false, 'center', [0.3,0.35,0.42]);
@@ -2087,7 +2197,7 @@ function pdfDrawing(pdf, bx, by, bw, bh){
   D.shapes.forEach((s, i) => {
     const n = s.pts.length, c = P(s.closed ? centroid(s.pts) : s.pts[Math.floor(n/2)]);
     pdf.circle(c[0], c[1], 7.5, C_ACC); pdf.text(c[0], c[1] - 3, String(i+1), 8, true, 'center', [1,1,1]);
-    if(isCurved(s) && D.scale) pdf.text(c[0], c[1] - 18, SH[s.geo.t].lab(s.geo.p), 7, false, 'center', [0.2,0.25,0.32]);
+    if(isCurved(s) && D.scale && geoAllMeasured(s)) pdf.text(c[0], c[1] - 18, SH[s.geo.t].lab(s.geo.p), 7, false, 'center', [0.2,0.25,0.32]);
   });
   return k;
 }
