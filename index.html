@@ -201,7 +201,7 @@ input,select{-webkit-user-select:text;user-select:text}
 <script>
 'use strict';
 /* =================== DATI =================== */
-const APP_VERSION = '5';   // si vede toccando il pulsante dell'account: serve a capire se il telefono ha l'ultima versione
+const APP_VERSION = '6';   // si vede toccando il pulsante dell'account: serve a capire se il telefono ha l'ultima versione
 const LS_KEY = 'misure_forme_v1';
 const OPT_KEY = 'misure_forme_opts';
 const OWNER_KEY = 'misure_forme_owner';
@@ -1060,6 +1060,35 @@ function dimsText(s){
 
 /* ---- aggancio (snap) ---- */
 function tolPx(){ return lastPT === 'touch' ? 22 : 12; }
+function closestOnSeg(p, a, b){
+  const dx = b.x-a.x, dy = b.y-a.y, l2 = dx*dx + dy*dy;
+  const t = l2 ? clamp(((p.x-a.x)*dx + (p.y-a.y)*dy)/l2, 0, 1) : 0;
+  return {x:a.x + t*dx, y:a.y + t*dy};
+}
+/* CALAMITA: spostando una forma vicino a un'altra, si attacca da sola.
+   Prima gli angoli (angolo su angolo), poi i lati (angolo sul lato dell'altra o viceversa).
+   d = spostamento che si vuole provare; restituisce la piccola correzione per attaccarsi. */
+function magnet(s, d){
+  const tol = tolPx() / view.z * 1.2, others = D.shapes.filter(o => o !== s);
+  if(!others.length) return null;
+  const step = isCurved(s) ? 3 : 1;
+  const mine = s.pts.filter((_, i) => i % step === 0).map(q => ({x:q.x + d.x, y:q.y + d.y}));
+  let best = null, bd = tol;
+  for(const p of mine) for(const o of others) for(const q of o.pts){ const dd = dist(p, q); if(dd < bd){ bd = dd; best = {x:q.x-p.x, y:q.y-p.y, at:q}; } }
+  if(best) return best;
+  bd = tol * 0.9;
+  for(const p of mine) for(const o of others) for(let i=0;i<segCount(o);i++){
+    const c = closestOnSeg(p, o.pts[i], o.pts[(i+1)%o.pts.length]), dd = dist(p, c);
+    if(dd < bd){ bd = dd; best = {x:c.x-p.x, y:c.y-p.y, at:c}; }
+  }
+  const n = s.pts.length, segs = s.closed ? n : n - 1;
+  for(const o of others) for(const q of (isCurved(o) ? o.pts.filter((_, i) => i % 3 === 0) : o.pts)) for(let i=0;i<segs;i++){
+    const a = {x:s.pts[i].x + d.x, y:s.pts[i].y + d.y}, b = {x:s.pts[(i+1)%n].x + d.x, y:s.pts[(i+1)%n].y + d.y};
+    const c = closestOnSeg(q, a, b), dd = dist(q, c);
+    if(dd < bd){ bd = dd; best = {x:q.x-c.x, y:q.y-c.y, at:q}; }
+  }
+  return best;
+}
 function snapPoint(w, from, exclude){
   const tol = tolPx() / view.z;
   // 1) aggancio a un vertice esistente
@@ -1071,6 +1100,15 @@ function snapPoint(w, from, exclude){
   D.shapes.forEach(s => s.pts.forEach((p,i) => consider(p, s.id, i)));
   draft.forEach((p,i) => consider(p, 'draft', i));
   if(best) return {x:best.x, y:best.y, snap:'v'};
+  // 1b) calamita sui lati delle forme (il punto si attacca al lato più vicino)
+  {
+    let be = null, bde = tol * 0.8;
+    D.shapes.forEach(s => {
+      if(exclude && exclude.sid === s.id) return;
+      for(let i=0;i<segCount(s);i++){ const c = closestOnSeg(w, s.pts[i], s.pts[(i+1)%s.pts.length]), d = dist(c, w); if(d < bde){ bde = d; be = c; } }
+    });
+    if(be) return {x:be.x, y:be.y, snap:'e'};
+  }
   let p = {x:w.x, y:w.y};
   // 2) griglia
   if(opts.grid){ const g = gridStep(); p.x = Math.round(p.x/g)*g; p.y = Math.round(p.y/g)*g; }
@@ -1213,10 +1251,20 @@ function openMeasure(shape, i){
 /* Imposta la lunghezza del lato i: la prima misura fissa la scala, le successive
    "stirano" la forma lungo la direzione del lato (come lo STRETCH dei CAD),
    così rettangoli e forme ad angolo retto restano squadrati. */
+const shapeHasMeasure = s => Object.keys(s.measures || {}).length > 0 || !!s.scaled || !!(s.geo && s.geo.measured);
 function applyMeasure(shape, i, cm){
   const n = shape.pts.length, A = shape.pts[i], bi = (i+1) % n, B = shape.pts[bi];
   const cur = dist(A, B); if(!(cur > 0)) return;
-  if(!D.scale){ D.scale = cm / cur; shape.measures[i] = cm; return; }
+  const ownOthers = Object.keys(shape.measures).some(k => +k !== i);
+  const others = D.shapes.some(x => x !== shape && shapeHasMeasure(x));
+  // unica misura del disegno: cambia solo la scala, la forma sullo schermo resta identica (5 cm, 5 m o 5 km)
+  if(!D.scale || (!ownOthers && !others)){ D.scale = cm / cur; shape.measures[i] = cm; return; }
+  // prima misura di questa forma (altre forme già misurate): la forma si ingrandisce o rimpicciolisce tutta insieme, senza deformarsi
+  if(!ownOthers){
+    const f = (cm / D.scale) / cur, c = centroid(shape.pts);
+    [shape.pts, ...(shape.holes||[])].forEach(r => r.forEach(q => { q.x = c.x + (q.x - c.x)*f; q.y = c.y + (q.y - c.y)*f; }));
+    shape.measures[i] = cm; return;
+  }
   const L = cm / D.scale, delta = L - cur, ux = (B.x-A.x)/cur, uy = (B.y-A.y)/cur, eps = cur*0.02;
   shape.pts.forEach((P, j) => {
     if(j === i) return;
@@ -1242,7 +1290,14 @@ function openShapeDims(s){
     onSave: (vals, ex) => {
       const np = {...p}; let sc = D.scale; const before = drawBox();
       const lens = T.ps.filter(q => q.t === 'len');
-      if(!sc){ const first = lens.find(q => vals[q.k] != null); if(first) sc = vals[first.k] / p[first.k]; }
+      const given = lens.filter(q => vals[q.k] != null), others = D.shapes.some(x => x !== s && shapeHasMeasure(x));
+      if(given.length === 1){
+        const k = given[0].k;
+        // una sola misura: se è l'unica del disegno cambia solo la scala (forma identica sullo schermo),
+        // altrimenti la forma si ridimensiona tutta insieme, senza deformarsi
+        if(!sc || !others) sc = vals[k] / p[k];
+        else { const f = (vals[k] / sc) / p[k]; lens.forEach(q => { np[q.k] = p[q.k] * f; }); }
+      } else if(!sc && given.length) sc = vals[given[0].k] / p[given[0].k];
       let anyLen = false; const mk = {...(s.geo.mk || (s.geo.measured ? Object.fromEntries(lens.map(q => [q.k, true])) : {}))};
       T.ps.forEach(q => {
         if(vals[q.k] == null){ if(q.t === 'len') delete mk[q.k]; return; }
@@ -1401,6 +1456,7 @@ function draw(){
     ctx.beginPath(); act.pts.forEach((p,i) => { const s = ws(p); i ? ctx.lineTo(s.x,s.y) : ctx.moveTo(s.x,s.y); }); ctx.stroke();
   }
   D.shapes.forEach(drawLabels);
+  if(act && act.snapAt){ const c = ws(act.snapAt); ctx.beginPath(); ctx.arc(c.x, c.y, 9, 0, TAU); ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.5; ctx.stroke(); }
   if(showArea && D.scale) D.shapes.forEach(s => {
     if(!s.closed) return;
     const c = ws(centroid(s.pts));
@@ -1600,8 +1656,15 @@ function onMove(p){
       break;
     case 'seg': case 'move':
       if(!act.moved) return;
-      if(!act.pushed){ pushHistory(); act.pushed = true; }
-      moveShape(act.shape, w.x - act.last.x, w.y - act.last.y); act.last = w;
+      if(!act.pushed){ pushHistory(); act.pushed = true; act.start = act.last; act.off = {x:0, y:0}; }
+      {
+        // spostamento voluto dall'inizio del trascinamento, poi la calamita lo corregge
+        const want = {x:w.x - act.start.x, y:w.y - act.start.y};
+        const mg = magnet(act.shape, {x:want.x - act.off.x, y:want.y - act.off.y});
+        const tgt = mg ? {x:want.x + mg.x, y:want.y + mg.y} : want;
+        moveShape(act.shape, tgt.x - act.off.x, tgt.y - act.off.y);
+        act.off = tgt; act.snapAt = mg ? mg.at : null;
+      }
       break;
   }
 }
@@ -1649,8 +1712,12 @@ function onUp(p){
       commitShape(pts.map(q => ({x:q.x, y:q.y})), closed);
       break;
     }
-    case 'seg': if(!a.moved) openShapeOrSide(a.shape, a.idx); else save(); break;
-    case 'move': if(a.moved) save(); else if(a.shape.geo) openShapeDims(a.shape); break;
+    case 'seg': case 'move':
+      if(!a.moved){ if(a.type === 'seg') openShapeOrSide(a.shape, a.idx); else if(a.shape.geo) openShapeDims(a.shape); break; }
+      save();
+      if(a.snapAt) toast(D.shapes.some(o => o !== a.shape && a.shape.closed && o.closed && a.shape.pts.some((_, i) => sharedNeighbor(a.shape, i) === o))
+        ? 'Attaccata ✓ Tocca la linea in comune per unire le due forme' : 'Attaccata ✓');
+      break;
     case 'vertex': if(a.moved) save(); break;
     case 'mergepick': {
       if(a.moved) break;

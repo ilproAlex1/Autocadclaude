@@ -11,6 +11,8 @@ App web per disegnare forme col dito (o col mouse), inserire le misure e calcola
 - **Misure:** tocca un lato (o una forma) e scrivi la misura in mm, cm, m o km. Cambiare unità converte solo i numeri: il disegno resta identico.
 - **Forme composte:** se due forme si toccano lungo un lato, tocca quel lato e scegli “Elimina questa linea e unisci” (oppure seleziona una forma → “Unisci con un’altra forma”): diventano un’unica forma con la sua area.
 - **Selezione:** tocca un lato per selezionare solo quel lato (arancione) e scriverne la misura; tocca dentro la forma per selezionarla tutta. Con un lato selezionato, “Elimina” toglie solo quel lato.
+- **Calamita:** spostando una forma vicino a un’altra, si attacca da sola agli angoli e ai lati (anche i punti che disegni si attaccano ai lati).
+- **Stessa forma con qualsiasi misura:** se scrivi la prima misura (5 cm, 5 m o 5 km) la forma sullo schermo resta identica; cambia solo la scala. La prima misura di ogni nuova forma la ingrandisce o rimpicciolisce tutta insieme, senza deformarla.
 - **Disegno sempre visibile:** qualunque misura scrivi (anche 25 km) il disegno resta della stessa grandezza sullo schermo; cambiano solo le proporzioni.
 - **Misure solo tue:** l'app non propone le misure degli altri lati; i lati senza misura mostrano “?” finché non le scrivi.
 - **Solidi uniti (3D):** tocca un solido, premi “Unisci”, tocca il secondo e scegli dove attaccarlo: diventano un unico solido senza parete interna.
